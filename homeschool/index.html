@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Little Scholar | Classical Learning</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #6C63FF;
+      --success: #4ECB71;
+      --gold: #FFD700;
+      --bg: #F8F9FC;
+      --card: #FFFFFF;
+      --text: #2D3142;
+      --text-light: #9094A6;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    header { background: linear-gradient(135deg, var(--primary), #5A52D5); color: white; padding: 20px; text-align: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(108,99,255,0.3); }
+    header h1 { font-size: 28px; font-weight: 800; }
+    header p { font-size: 14px; opacity: 0.9; }
+    .stars-counter { position: absolute; top: 12px; right: 16px; background: rgba(255,255,255,0.2); padding: 8px 14px; border-radius: 20px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+    nav { display: flex; background: var(--card); padding: 12px 16px; gap: 8px; overflow-x: auto; border-bottom: 1px solid #E8E9F3; }
+    nav button { flex-shrink: 0; background: #F8F9FC; border: 2px solid #E8E9F3; padding: 10px 18px; border-radius: 12px; font-family: inherit; font-weight: 600; font-size: 14px; cursor: pointer; color: var(--text-light); }
+    nav button.active { background: var(--primary); border-color: var(--primary); color: white; }
+    main { padding: 20px; max-width: 800px; margin: 0 auto; }
+    .tab { display: none; }
+    .tab.active { display: block; }
+    .dashboard { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+    .stat-card { background: var(--card); border-radius: 16px; padding: 16px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+    .stat-card .value { font-size: 28px; font-weight: 800; color: var(--primary); }
+    .stat-card.gold .value { color: var(--gold); }
+    .stat-card.streak .value, .stat-card.success .value { color: var(--success); }
+    .stat-card .label { font-size: 11px; color: var(--text-light); margin-top: 4px; }
+    .subject-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .subject-card { background: var(--card); border-radius: 16px; padding: 24px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; }
+    .subject-card:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+    .subject-card .icon { font-size: 48px; margin-bottom: 12px; }
+    .subject-card h3 { font-size: 16px; margin-bottom: 4px; }
+    .subject-card p { font-size: 12px; color: var(--text-light); }
+    .subject-card .progress { width: 100%; height: 8px; background: #E8E9F3; border-radius: 4px; margin-top: 12px; overflow: hidden; }
+    .subject-card .progress-bar { height: 100%; background: var(--success); border-radius: 4px; }
+    .game-screen { text-align: center; }
+    .back-btn { background: var(--card); border: 2px solid #E8E9F3; padding: 10px 20px; border-radius: 12px; font-family: inherit; font-weight: 600; cursor: pointer; margin-bottom: 20px; }
+    .level-badge { display: inline-block; background: var(--primary); color: white; padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; margin-bottom: 16px; }
+    .question-card { background: var(--card); border-radius: 24px; padding: 40px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); margin-bottom: 24px; }
+    .question-card .question { font-size: 56px; font-weight: 800; margin-bottom: 8px; }
+    .question-card .sub { font-size: 16px; color: var(--text-light); }
+    .answer-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .answer-btn { background: var(--card); border: 3px solid #E8E9F3; padding: 24px; border-radius: 16px; font-family: inherit; font-size: 32px; font-weight: 700; cursor: pointer; transition: all 0.2s; min-height: 80px; }
+    .answer-btn:hover { border-color: var(--primary); transform: scale(1.02); }
+    .answer-btn.correct { background: var(--success); border-color: var(--success); color: white; animation: pop 0.3s; }
+    .answer-btn.wrong { background: #FF6B6B; border-color: #FF6B6B; color: white; animation: shake 0.3s; }
+    @keyframes pop { 50% { transform: scale(1.1); } }
+    @keyframes shake { 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+    .session-progress { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding: 12px 16px; background: var(--card); border-radius: 12px; }
+    .session-progress .stars-earned { display: flex; align-items: center; gap: 4px; font-weight: 700; color: var(--gold); }
+    .session-progress .bar { flex: 1; height: 12px; background: #E8E9F3; border-radius: 6px; overflow: hidden; }
+    .session-progress .bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--success)); border-radius: 6px; transition: width 0.3s; }
+    .reward-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 200; }
+    .reward-overlay.show { display: flex; }
+    .reward-content { background: var(--card); border-radius: 24px; padding: 40px; text-align: center; animation: bounce 0.5s; }
+    @keyframes bounce { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
+    .reward-content .icon { font-size: 80px; }
+    .reward-content h2 { font-size: 28px; margin: 16px 0; color: var(--gold); }
+    .reward-content p { color: var(--text-light); margin-bottom: 20px; }
+    .reward-content button { background: var(--primary); color: white; border: none; padding: 14px 32px; border-radius: 12px; font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer; }
+    .flashcard { background: var(--card); border-radius: 24px; padding: 40px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); margin-bottom: 24px; min-height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
+    .flashcard .word { font-size: 42px; font-weight: 800; margin-bottom: 16px; }
+    .flashcard .hint { font-size: 14px; color: var(--text-light); }
+    .badge-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 20px; }
+    .badge { background: var(--card); border-radius: 16px; padding: 20px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+    .badge.earned { border: 3px solid var(--gold); }
+    .badge.locked { opacity: 0.4; }
+    .badge .icon { font-size: 40px; margin-bottom: 8px; }
+    .badge .name { font-size: 12px; font-weight: 700; }
+    .badge .desc { font-size: 10px; color: var(--text-light); margin-top: 4px; }
+    .worksheet-section { background: var(--card); border-radius: 16px; padding: 24px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+    .worksheet-section h3 { margin-bottom: 16px; font-size: 18px; }
+    .worksheet-section .options { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+    .worksheet-section select, .worksheet-section input { padding: 10px 14px; border: 2px solid #E8E9F3; border-radius: 10px; font-family: inherit; font-size: 14px; }
+    .print-btn { background: var(--primary); color: white; border: none; padding: 14px 28px; border-radius: 12px; font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer; }
+    #printArea { display: none; }
+    @media print { header, nav, .game-screen, .reward-overlay { display: none !important; } #printArea { display: block !important; } .worksheet { page-break-after: always; margin-bottom: 40px; } .worksheet h2 { font-size: 24px; margin-bottom: 20px; } .worksheet-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; } .worksheet-item { border: 2px solid #333; padding: 20px; text-align: center; font-size: 18px; } }
+    @media (max-width: 600px) { .dashboard { grid-template-columns: repeat(2, 1fr); } .subject-grid { grid-template-columns: 1fr 1fr; } .answer-btn { font-size: 24px; padding: 20px; } .question-card { padding: 30px; } .question-card .question { font-size: 36px; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="stars-counter"><span>⭐</span> <span id="totalStars">0</span></div>
+    <h1>Little Scholar</h1>
+    <p>Classical Learning Adventures</p>
+  </header>
+  <nav>
+    <button class="active" onclick="showTab('dashboard')">Home</button>
+    <button onclick="showTab('math')">Math</button>
+    <button onclick="showTab('reading')">Reading</button>
+    <button onclick="showTab('badges')">Badges</button>
+    <button onclick="showTab('worksheets')">Print</button>
+  </nav>
+  <main>
+    <div id="tab-dashboard" class="tab active">
+      <div class="dashboard">
+        <div class="stat-card gold"><div class="value" id="dashStars">0</div><div class="label">Stars</div></div>
+        <div class="stat-card streak"><div class="value" id="dashStreak">0</div><div class="label">Day Streak</div></div>
+        <div class="stat-card success"><div class="value" id="dashMastered">0</div><div class="label">Mastered</div></div>
+        <div class="stat-card"><div class="value" id="dashLearning">0</div><div class="label">Learning</div></div>
+      </div>
+      <h2 style="margin-bottom:16px;font-size:20px;">Choose Your Adventure</h2>
+      <div class="subject-grid">
+        <div class="subject-card" onclick="startGame('add')"><div class="icon">🔢</div><h3>Addition</h3><p>Master +1 to +20</p><div class="progress"><div class="progress-bar" style="width:0%"></div></div></div>
+        <div class="subject-card" onclick="startGame('skip')"><div class="icon">⏭️</div><h3>Skip Counting</h3><p>Count by 2s, 3s, 5s, 10s</p><div class="progress"><div class="progress-bar" style="width:0%"></div></div></div>
+        <div class="subject-card" onclick="startGame('read')"><div class="icon">📖</div><h3>Word Flash</h3><p>Read & recognize</p><div class="progress"><div class="progress-bar" style="width:0%"></div></div></div>
+        <div class="subject-card" onclick="startGame('states')"><div class="icon">🗺️</div><h3>States</h3><p>Learn US states</p><div class="progress"><div class="progress-bar" style="width:0%"></div></div></div>
+      </div>
+    </div>
+    <div id="tab-math" class="tab game-screen">
+      <button class="back-btn" onclick="showTab('dashboard')">← Back</button>
+      <div class="session-progress"><div class="stars-earned">⭐ <span id="sessionStars">0</span></div><div class="bar"><div class="bar-fill" id="sessionBar" style="width:0%"></div></div><span id="sessionProgress">0/10</span></div>
+      <div class="level-badge" id="gameLevel">Level 1</div>
+      <div class="question-card"><div class="question" id="questionText">5 + 3 = ?</div><div class="sub" id="questionHint">Find the answer</div></div>
+      <div class="answer-grid" id="answerGrid"></div>
+    </div>
+    <div id="tab-reading" class="tab game-screen">
+      <button class="back-btn" onclick="showTab('dashboard')">← Back</button>
+      <div class="level-badge">Reading Practice</div>
+      <div class="flashcard" id="flashcard" onclick="revealCard()"><div class="word" id="flashWord">BUTTERFLY</div><div class="hint" id="flashHint">Tap to reveal</div></div>
+      <div class="answer-grid"><button class="answer-btn" onclick="nextCard(-1)">Hard</button><button class="answer-btn" onclick="nextCard(0)">Okay</button><button class="answer-btn" onclick="nextCard(1)">Easy</button></div>
+    </div>
+    <div id="tab-badges" class="tab">
+      <h2 style="margin-bottom:20px">Your Achievements</h2>
+      <div class="badge-gallery" id="badgeGallery">
+        <div class="badge locked"><div class="icon">🌟</div><div class="name">First Star</div><div class="desc">Earn your first star</div></div>
+        <div class="badge locked"><div class="icon">🔥</div><div class="name">3 Day Streak</div><div class="desc">Learn 3 days in a row</div></div>
+        <div class="badge locked"><div class="icon">🧮</div><div class="name">Math Whiz</div><div class="desc">Master addition 1-20</div></div>
+        <div class="badge locked"><div class="icon">📚</div><div class="name">Word Master</div><div class="desc">Read 50 words</div></div>
+        <div class="badge locked"><div class="icon">🌍</div><div class="name">Explorer</div><div class="desc">Learn all 50 states</div></div>
+        <div class="badge locked"><div class="icon">⭐</div><div class="name">Super Star</div><div class="desc">Earn 100 stars</div></div>
+      </div>
+    </div>
+    <div id="tab-worksheets" class="tab">
+      <div class="worksheet-section">
+        <h3>Math Worksheets</h3>
+        <div class="options">
+          <select id="mathType"><option value="add">Addition</option><option value="sub">Subtraction</option></select>
+          <select id="mathLevel"><option value="easy">Easy (1-10)</option><option value="medium">Medium (1-20)</option></select>
+          <input type="number" id="mathCount" value="20" min="5" max="50" style="width:80px"><span>problems</span>
+        </div>
+        <button class="print-btn" onclick="generateMath()">Generate & Print</button>
+      </div>
+      <div class="worksheet-section">
+        <h3>Reading Worksheets</h3>
+        <div class="options">
+          <input type="number" id="readingCount" value="15" min="5" max="50" style="width:80px"><span>words</span>
+        </div>
+        <button class="print-btn" onclick="generateReading()">Generate & Print</button>
+      </div>
+      <div id="printArea"></div>
+    </div>
+  </main>
+  <div class="reward-overlay" id="rewardOverlay"><div class="reward-content"><div class="icon">🎉</div><h2>Amazing Job!</h2><p id="rewardText">You earned 5 stars!</p><button onclick="closeReward()">Keep Going!</button></div></div>
+<script>
+let state=JSON.parse(localStorage.getItem('scholar-state'))||{stars:0,streak:0,lastPlay:null,mastered:[],badges:[],wordsRead:0};
+function saveState(){localStorage.setItem('scholar-state',JSON.stringify(state));updateDash();}
+function updateDash(){document.getElementById('totalStars').textContent=state.stars;document.getElementById('dashStars').textContent=state.stars;document.getElementById('dashStreak').textContent=state.streak;document.getElementById('dashMastered').textContent=state.mastered.length;document.getElementById('dashLearning').textContent=state.learning?state.learning.length:0;document.querySelectorAll('.badge').forEach(b=>{if(state.badges.includes(b.querySelector('.name').textContent)){b.classList.remove('locked');b.classList.add('earned');}});}
+function checkStreak(){const today=new Date().toDateString();const last=state.lastPlay?new Date(state.lastPlay).toDateString():null;const yesterday=new Date(Date.now()-86400000).toDateString();if(last===yesterday)state.streak++;else if(last!==today)state.streak=1;state.lastPlay=new Date().toISOString();}
+function showTab(tab){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));document.getElementById('tab-'+tab).classList.add('active');event.target.classList.add('active');}
+let gameType,sessionCorrect=0,sessionTotal=0,sessionStars=0;
+function startGame(type){gameType=type;sessionCorrect=0;sessionTotal=0;sessionStars=0;checkStreak();document.getElementById('sessionStars').textContent='0';document.getElementById('sessionBar').style.width='0%';document.getElementById('sessionProgress').textContent='0/10';if(type==='add'||type==='sub'){showTab('math');nextQuestion();}else if(type==='skip'){showTab('math');nextSkip();}else if(type==='read'){showTab('reading');nextFlash();}}
+function nextQuestion(){const max=20;let a=Math.floor(Math.random()*max)+1,b=Math.floor(Math.random()*max)+1,answer;if(gameType==='add'){answer=a+b;document.getElementById('questionText').textContent=a+' + '+b+' = ?';}else{answer=a-b;document.getElementById('questionText').textContent=a+' - '+b+' = ?';}let wrong=[];while(wrong.length<3){const w=answer+(Math.floor(Math.random()*7)-3);if(w!==answer&&w>0&&!wrong.includes(w))wrong.push(w);}const options=[answer,...wrong].sort(()=>Math.random()-0.5);document.getElementById('answerGrid').innerHTML=options.map(o=>`<button class="answer-btn" onclick="checkAns(${o},${answer})">${o}</button>`).join('');}
+function checkAns(s,c){const btns=document.querySelectorAll('.answer-btn');btns.forEach(b=>{b.disabled=true;if(parseInt(b.textContent)===c)b.classList.add('correct');else if(parseInt(b.textContent)===s&&s!==c)b.classList.add('wrong');});sessionTotal++;if(s===c){sessionCorrect++;sessionStars+=2;state.stars+=2;document.getElementById('sessionStars').textContent=sessionStars;}document.getElementById('sessionBar').style.width=(sessionTotal/10*100)+'%';document.getElementById('sessionProgress').textContent=sessionTotal+'/10';saveState();setTimeout(()=>{if(sessionTotal>=10)endGame();else nextQuestion();},1000);}
+function nextSkip(){const counts=[2,3,4,5,6,7,8,9,10];const by=counts[Math.floor(Math.random()*counts.length)];const start=Math.floor(Math.random()*5)*by;const seq=[start,start+by,start+by*2,start+by*3];document.getElementById('questionText').textContent=seq.join(', ')+', _';const answer=start+by*4;const wrong=[answer+by,answer-by,answer+by*2].filter(n=>n>0&&n!==answer);const options=[answer,...wrong.slice(0,3)].sort(()=>Math.random()-0.5);document.getElementById('answerGrid').innerHTML=options.map(o=>`<button class="answer-btn" onclick="checkAns(${o},${answer})">${o}</button>`).join('');}
+const words=['BUTTERFLY','RAINBOW','ADVENTURE','BEAUTIFUL','FANTASTIC','CHOCOLATE','ELEPHANT','GIRAFFE','HAPPINESS','JELLYFISH','KANGAROO','LIBRARY','MAGICAL','PINEAPPLE','QUESTION','TREASURE','UMBRELLA','VOLCANO','WATERFALL','ZEBRA','ASTRONAUT','BALLOON','DINOSAUR','FLOWER','GARDEN','ISLAND','MOUNTAIN','NOTEBOOK','ORANGE','PRETEND'];
+let flashIndex=0;
+function nextFlash(){flashIndex=Math.floor(Math.random()*words.length);document.getElementById('flashWord').textContent=words[flashIndex];document.getElementById('flashHint').textContent='Tap to reveal';document.getElementById('flashcard').classList.remove('reveal');}
+function revealCard(){document.getElementById('flashHint').textContent='Sound it out!';document.getElementById('flashcard').classList.add('reveal');}
+function nextCard(difficulty){if(difficulty>0)state.wordsRead++;sessionTotal++;sessionStars+=1;state.stars+=1;document.getElementById('sessionStars').textContent=sessionStars;document.getElementById('sessionBar').style.width=(sessionTotal/10*100)+'%';document.getElementById('sessionProgress').textContent=sessionTotal+'/10';saveState();if(sessionTotal>=10)endGame();else nextFlash();}
+function endGame(){if(sessionCorrect>=7){showReward();}else{showTab('dashboard');}}
+function showReward(){document.getElementById('rewardText').textContent='You earned '+sessionStars+' stars!';document.getElementById('rewardOverlay').classList.add('show');checkBadges();}
+function closeReward(){document.getElementById('rewardOverlay').classList.remove('show');showTab('dashboard');}
+function checkBadges(){if(state.stars>=1&&!state.badges.includes('First Star'))state.badges.push('First Star');if(state.streak>=3&&!state.badges.includes('3 Day Streak'))state.badges.push('3 Day Streak');if(state.stars>=100&&!state.badges.includes('Super Star'))state.badges.push('Super Star');saveState();}
+function generateMath(){const type=document.getElementById('mathType').value;const level=document.getElementById('mathLevel').value;const count=parseInt(document.getElementById('mathCount').value)||20;const max=level==='easy'?10:20;let html=`<div class="worksheet"><h2>${type==='add'?'Addition':'Subtraction'} Worksheet (${level})</h2><div class="worksheet-grid">`;for(let i=0;i<count;i++){const a=Math.floor(Math.random()*max)+1;const b=Math.floor(Math.random()*max)+1;if(type==='add'){html+=`<div class="worksheet-item">${a} + ${b} = ____</div>`;}else{const big=Math.max(a,b);const small=Math.min(a,b);html+=`<div class="worksheet-item">${big} - ${small} = ____</div>`;}}html+='</div></div>';document.getElementById('printArea').innerHTML=html;window.print();}
+function generateReading(){const count=parseInt(document.getElementById('readingCount').value)||15;let html=`<div class="worksheet"><h2>Reading Worksheet</h2><div class="worksheet-grid">`;for(let i=0;i<count;i++){const word=words[Math.floor(Math.random()*words.length)];html+=`<div class="worksheet-item" style="font-size:24px;font-weight:700;">${word}</div>`;}html+='</div></div>';document.getElementById('printArea').innerHTML=html;window.print();}
+updateDash();
+</script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+{
+  "name": "Whale Tracker",
+  "version": "1.0.0",
+  "description": "Track Bitcoin accumulators (MSTR, GIGA, ETC) and generate whale activity signals for X/Twitter",
+  "commands": [
+    {
+      "name": "whaleTrack",
+      "description": "Track Bitcoin accumulator stocks and their premium to BTC",
+      "example": "!whaleTrack"
+    },
+    {
+      "name": "whalePost",
+      "description": "Generate an X/Twitter post about whale activity",
+      "example": "!whalePost"
+    },
+    {
+      "name": "whaleSignals",
+      "description": "Get trading signals based on accumulator movements",
+      "example": "!whaleSignals"
+    }
+  ],
+  "configuration": {
+    "BLOCKCHAIR_API_KEY": "Optional - for detailed blockchain data",
+    "twitter_api_key": "Required for posting to X",
+    "twitter_api_secret": "Required for posting to X",
+    "twitter_access_token": "Required for posting to X",
+    "twitter_access_secret": "Required for posting to X"
+  },
+  "tracked_stocks": [
+    "MSTR",
+    "GIGA",
+    "ETC", 
+    "HUT",
+    "CLBT",
+    "BTG"
+  ],
+  "disclaimer": "Educational content only. Not financial advice."
+}

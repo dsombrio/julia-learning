@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TradBot CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <style>
+    :root {
+      --bg: #0f0f0f;
+      --bg-secondary: #1a1a1a;
+      --bg-card: #222222;
+      --bg-hover: #2a2a2a;
+      --border: #333;
+      --text: #ffffff;
+      --text-secondary: #888;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --success: #22c55e;
+      --radius: 8px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* Auth Screen */
+    .auth-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .auth-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 40px;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .auth-card h1 {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+
+    .auth-card p {
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+
+    .auth-tabs {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .auth-tab {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 14px;
+      cursor: pointer;
+      padding: 8px 0;
+      border-bottom: 2px solid transparent;
+    }
+
+    .auth-tab.active {
+      color: var(--text);
+      border-bottom-color: var(--accent);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: var(--radius);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-secondary {
+      background: var(--bg-hover);
+      color: var(--text);
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-secondary);
+    }
+
+    .btn-ghost:hover {
+      color: var(--text);
+    }
+
+    /* Layout */
+    .app-layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 220px;
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .sidebar-logo {
+      font-size: 18px;
+      font-weight: 700;
+      padding: 8px 12px;
+      margin-bottom: 24px;
+    }
+
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: var(--radius);
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      background: var(--bg-hover);
+      color: var(--text);
+    }
+
+    .nav-item.active {
+      background: var(--accent);
+      color: white;
+    }
+
+    .nav-item i { width: 18px; height: 18px; }
+
+    .sidebar-bottom {
+      margin-top: auto;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      margin-left: 220px;
+      padding: 24px;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .page-title {
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+    }
+
+    /* Dashboard */
+    .dashboard-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .stat-card .label {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+
+    .stat-card .value {
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .stat-card .sub {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    /* Task List */
+    .task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      transition: all 0.15s;
+    }
+
+    .task-item:hover {
+      border-color: var(--accent);
+    }
+
+    .task-item.completed {
+      opacity: 0.5;
+    }
+
+    .task-item.overdue-1day {
+      border-color: var(--danger);
+    }
+
+    .task-item.overdue-soft {
+      animation: pulse-red 2s infinite;
+    }
+
+    @keyframes pulse-red {
+      0%, 100% { background: var(--bg-card); }
+      50% { background: rgba(239, 68, 68, 0.1); }
+    }
+
+    .task-checkbox {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border);
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .task-checkbox:hover {
+      border-color: var(--accent);
+    }
+
+    .task-checkbox.checked {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .task-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .task-title {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .task-meta {
+      font-size: 12px;
+      color: var(--text-secondary);
+      display: flex;
+      gap: 12px;
+      margin-top: 2px;
+    }
+
+    .task-time {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .task-time.overdue-1day {
+      color: var(--danger);
+    }
+
+    .task-time.overdue-soft {
+      color: var(--danger);
+      font-weight: 700;
+    }
+
+    .task-actions {
+      display: flex;
+      gap: 4px;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+
+    .task-item:hover .task-actions {
+      opacity: 1;
+    }
+
+    /* Contact/Deal Cards */
+    .contact-card, .deal-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .contact-card:hover, .deal-card:hover {
+      border-color: var(--accent);
+    }
+
+    .contact-card .name {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .contact-card .company {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .contact-card .contact-info {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 8px;
+    }
+
+    .deal-card .title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .deal-card .contact {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .deal-card .value {
+      font-size: 18px;
+      font-weight: 700;
+      margin-top: 8px;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .badge-customer { background: #3b82f620; color: #3b82f6; }
+    .badge-vendor { background: #22c55e20; color: #22c55e; }
+    .badge-prospect { background: #f59e0b20; color: #f59e0b; }
+    .badge-lead { background: #6b728020; color: #9ca3af; }
+    .badge-prospect { background: #3b82f620; color: #3b82f6; }
+    .badge-proposal { background: #f59e0b20; color: #f59e0b; }
+    .badge-negotiation { background: #8b5cf620; color: #8b5cf6; }
+    .badge-won { background: #22c55e20; color: #22c55e; }
+    .badge-lost { background: #ef444420; color: #ef4444; }
+    .badge-plaud { background: #ec489920; color: #ec4899; }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      transform: translateY(20px);
+      transition: transform 0.2s;
+    }
+
+    .modal-overlay.active .modal {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h2 {
+      font-size: 18px;
+    }
+
+    .modal-body {
+      padding: 20px;
+    }
+
+    .modal-footer {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    /* Toast */
+    .toast-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .toast {
+      padding: 12px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 14px;
+      animation: slide-in 0.2s ease;
+    }
+
+    @keyframes slide-in {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* Filter tabs */
+    .filter-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .filter-tab {
+      padding: 6px 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .filter-tab:hover {
+      border-color: var(--accent);
+      color: var(--text);
+    }
+
+    .filter-tab.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    /* Search */
+    .search-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 8px 12px;
+      margin-bottom: 16px;
+    }
+
+    .search-bar input {
+      flex: 1;
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+    }
+
+    .search-bar input::placeholder {
+      color: var(--text-secondary);
+    }
+
+    /* Notes */
+    .note-item {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .note-item:last-child {
+      border-bottom: none;
+    }
+
+    .note-content {
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .note-meta {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-secondary);
+    }
+
+    .empty-state i {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .empty-state h3 {
+      font-size: 16px;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    /* Hidden pages */
+    .page { display: none; }
+    .page.active { display: block; }
+  </style>
+</head>
+<body>
+  <!-- Auth Screen -->
+  <div id="auth-screen" class="auth-screen">
+    <div class="auth-card">
+      <h1>TradBot CRM</h1>
+      <p>Manage your sales pipeline</p>
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login">Login</button>
+        <button class="auth-tab" data-tab="register">Register</button>
+      </div>
+      <form id="login-form">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="login-email" required>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="login-password" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%">Login</button>
+      </form>
+      <form id="register-form" style="display:none">
+        <div class="form-group">
+          <label>Name</label>
+          <input type="text" id="register-name" required>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="register-email" required>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="register-password" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%">Create Account</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- App -->
+  <div id="app" class="app-layout" style="display:none">
+    <aside class="sidebar">
+      <div class="sidebar-logo">TradBot CRM</div>
+      <nav class="sidebar-nav">
+        <a class="nav-item active" data-page="dashboard">
+          <i data-lucide="layout-dashboard"></i> Dashboard
+        </a>
+        <a class="nav-item" data-page="contacts">
+          <i data-lucide="users"></i> Contacts
+        </a>
+        <a class="nav-item" data-page="deals">
+          <i data-lucide="trending-up"></i> Deals
+        </a>
+        <a class="nav-item" data-page="tasks">
+          <i data-lucide="check-square"></i> Tasks
+        </a>
+        <a class="nav-item" data-page="notes">
+          <i data-lucide="file-text"></i> Notes
+        </a>
+      </nav>
+      <div class="sidebar-bottom">
+        <a class="nav-item" id="logout-btn">
+          <i data-lucide="log-out"></i> Logout
+        </a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <!-- Dashboard -->
+      <div id="page-dashboard" class="page active">
+        <div class="page-header">
+          <h1 class="page-title">Dashboard</h1>
+        </div>
+        <div class="dashboard-stats">
+          <div class="stat-card">
+            <div class="label">Today's Tasks</div>
+            <div class="value" id="stat-tasks">0</div>
+            <div class="sub" id="stat-tasks-sub">pending</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Active Deals</div>
+            <div class="value" id="stat-deals">0</div>
+            <div class="sub" id="stat-deals-sub">in pipeline</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Pipeline Value</div>
+            <div class="value" id="stat-value">$0</div>
+            <div class="sub">open deals</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="page-header" style="margin-bottom:16px">
+            <h2 style="font-size:16px;font-weight:600">Recent Tasks</h2>
+            <button class="btn btn-primary btn-sm" onclick="openTaskModal()">
+              <i data-lucide="plus" style="width:16px;height:16px"></i> Add Task
+            </button>
+          </div>
+          <div id="dashboard-tasks" class="task-list"></div>
+        </div>
+      </div>
+
+      <!-- Contacts -->
+      <div id="page-contacts" class="page">
+        <div class="page-header">
+          <h1 class="page-title">Contacts</h1>
+          <button class="btn btn-primary" onclick="openContactModal()">
+            <i data-lucide="plus" style="width:16px;height:16px"></i> Add Contact
+          </button>
+        </div>
+        <div class="search-bar">
+          <i data-lucide="search" style="width:18px;height:18px;color:var(--text-secondary)"></i>
+          <input type="text" id="contact-search" placeholder="Search contacts..." oninput="filterContacts()">
+        </div>
+        <div class="filter-tabs">
+          <button class="filter-tab active" data-filter="all" onclick="filterContactsByType('all')">All</button>
+          <button class="filter-tab" data-filter="customer" onclick="filterContactsByType('customer')">Customers</button>
+          <button class="filter-tab" data-filter="vendor" onclick="filterContactsByType('vendor')">Vendors</button>
+          <button class="filter-tab" data-filter="prospect" onclick="filterContactsByType('prospect')">Prospects</button>
+        </div>
+        <div id="contacts-grid" class="card-grid"></div>
+      </div>
+
+      <!-- Deals -->
+      <div id="page-deals" class="page">
+        <div class="page-header">
+          <h1 class="page-title">Deals</h1>
+          <button class="btn btn-primary" onclick="openDealModal()">
+            <i data-lucide="plus" style="width:16px;height:16px"></i> Add Deal
+          </button>
+        </div>
+        <div class="filter-tabs">
+          <button class="filter-tab active" data-filter="all" onclick="filterDealsByStage('all')">All</button>
+          <button class="filter-tab" data-filter="lead" onclick="filterDealsByStage('lead')">Lead</button>
+          <button class="filter-tab" data-filter="prospect" onclick="filterDealsByStage('prospect')">Prospect</button>
+          <button class="filter-tab" data-filter="proposal" onclick="filterDealsByStage('proposal')">Proposal</button>
+          <button class="filter-tab" data-filter="negotiation" onclick="filterDealsByStage('negotiation')">Negotiation</button>
+        </div>
+        <div id="deals-grid" class="card-grid"></div>
+      </div>
+
+      <!-- Tasks -->
+      <div id="page-tasks" class="page">
+        <div class="page-header">
+          <h1 class="page-title">Tasks</h1>
+          <button class="btn btn-primary" onclick="openTaskModal()">
+            <i data-lucide="plus" style="width:16px;height:16px"></i> Add Task
+          </button>
+        </div>
+        <div class="filter-tabs">
+          <button class="filter-tab active" data-filter="pending" onclick="filterTasksByStatus('pending')">Pending</button>
+          <button class="filter-tab" data-filter="completed" onclick="filterTasksByStatus('completed')">Completed</button>
+          <button class="filter-tab" data-filter="all" onclick="filterTasksByStatus('all')">All</button>
+        </div>
+        <div id="tasks-list" class="task-list"></div>
+      </div>
+
+      <!-- Notes -->
+      <div id="page-notes" class="page">
+        <div class="page-header">
+          <h1 class="page-title">Notes</h1>
+          <button class="btn btn-primary" onclick="openNoteModal()">
+            <i data-lucide="plus" style="width:16px;height:16px"></i> Add Note
+          </button>
+        </div>
+        <div id="notes-list"></div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modals -->
+  <div id="modal-overlay" class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2 id="modal-title">Add Item</h2>
+        <button class="btn btn-ghost" onclick="closeModal()">
+          <i data-lucide="x" style="width:20px;height:20px"></i>
+        </button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" id="modal-save" onclick="saveModal()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

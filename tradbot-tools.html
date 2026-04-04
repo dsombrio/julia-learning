@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TradBot Tools</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #1a1a2e; color: #eee; min-height: 100vh; }
+    .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+    h1 { text-align: center; padding: 20px 0; color: #00d4ff; }
+    .tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+    .tab { background: #16213e; border: none; padding: 12px 24px; color: #888; cursor: pointer; border-radius: 8px; font-size: 16px; transition: all 0.2s; }
+    .tab.active { background: #0f3460; color: #00d4ff; }
+    .tab:hover { background: #1a1a3e; }
+    .panel { display: none; background: #16213e; padding: 24px; border-radius: 12px; }
+    .panel.active { display: block; }
+    .form-group { margin-bottom: 16px; }
+    label { display: block; margin-bottom: 6px; color: #aaa; font-size: 14px; }
+    input, textarea, select { width: 100%; padding: 12px; background: #1a1a2e; border: 1px solid #333; border-radius: 8px; color: #fff; font-size: 16px; }
+    input:focus, textarea:focus, select:focus { outline: none; border-color: #00d4ff; }
+    textarea { min-height: 120px; resize: vertical; }
+    button.btn { background: #00d4ff; color: #1a1a2e; border: none; padding: 12px 24px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-right: 10px; margin-top: 10px; }
+    button.btn:hover { background: #00b8e6; }
+    button.btn-secondary { background: #333; color: #fff; }
+    .card { background: #1a1a2e; padding: 16px; border-radius: 8px; margin-bottom: 12px; border-left: 3px solid #00d4ff; }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .card-title { font-weight: 600; color: #fff; }
+    .card-time { color: #00d4ff; font-size: 14px; }
+    .card-body { color: #aaa; font-size: 14px; }
+    .tag { display: inline-block; padding: 4px 8px; background: #0f3460; border-radius: 4px; font-size: 12px; margin-right: 6px; }
+    .tag.urgent { background: #e74c3c; }
+    .empty { text-align: center; color: #666; padding: 40px; }
+    .generated-email { background: #0f3460; padding: 16px; border-radius: 8px; margin-top: 16px; white-space: pre-wrap; font-family: monospace; }
+    .status { padding: 10px; border-radius: 6px; margin-bottom: 16px; }
+    .status.success { background: #27ae60; }
+    .status.error { background: #e74c3c; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>TradBot Tools</h1>
+    
+    <div class="tabs">
+      <button class="tab active" data-tab="meeting">Meeting Prep</button>
+      <button class="tab" data-tab="quote">Quick Quote</button>
+      <button class="tab" data-tab="lead">Lead Follow-up</button>
+    </div>
+
+    <!-- Meeting Prep Panel -->
+    <div class="panel active" id="meeting">
+      <h2 style="margin-bottom: 16px;">Today's Meetings</h2>
+      <div id="meetings-list"></div>
+    </div>
+
+    <!-- Quick Quote Panel -->
+    <div class="panel" id="quote">
+      <h2 style="margin-bottom: 16px;">Quick Quote Request</h2>
+      <div class="form-group">
+        <label>Vendor Name</label>
+        <input type="text" id="vendor-name" placeholder="e.g., Doorwin Windows">
+      </div>
+      <div class="form-group">
+        <label>Product(s) Needed</label>
+        <textarea id="products" placeholder="e.g., 10x 3076 Tempered PW, black/black vinyl"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Project Details</label>
+        <textarea id="project-details" placeholder="e.g., Houston multi-family project, 50 units"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Your Name</label>
+        <input type="text" id="sender-name" value="David Sombrio">
+      </div>
+      <button class="btn" onclick="generateQuoteEmail()">Generate Email</button>
+      <button class="btn btn-secondary" onclick="copyEmail()">Copy</button>
+      <div id="quote-result"></div>
+    </div>
+
+    <!-- Lead Follow-up Panel -->
+    <div class="panel" id="lead">
+      <h2 style="margin-bottom: 16px;">Lead Follow-up Tracker</h2>
+      <div class="form-group">
+        <label>Lead Name</label>
+        <input type="text" id="lead-name" placeholder="e.g., John from ABC Builders">
+      </div>
+      <div class="form-group">
+        <label>Company</label>
+        <input type="text" id="lead-company" placeholder="e.g., ABC Builders">
+      </div>
+      <div class="form-group">
+        <label>Last Contact Date</label>
+        <input type="date" id="lead-date">
+      </div>
+      <div class="form-group">
+        <label>Notes</label>
+        <textarea id="lead-notes" placeholder="What did you discuss?"></textarea>
+      </div>
+      <button class="btn" onclick="addLead()">Add Lead</button>
+      <button class="btn btn-secondary" onclick="clearLeads()">Clear All</button>
+      <div id="leads-list" style="margin-top: 20px;"></div>
+    </div>
+  </div>
+
+  <script>
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.tab).classList.add('active');
+      });
+    });
+
+    // Load meetings from Outlook (mock for now - can connect to API)
+    async function loadMeetings() {
+      const container = document.getElementById('meetings-list');
+      
+      // Try to load from API, fallback to demo data
+      try {
+        const response = await fetch('/api/meetings');
+        if (response.ok) {
+          const meetings = await response.json();
+          renderMeetings(meetings);
+          return;
+        }
+      } catch (e) {}
+      
+      // Demo data
+      const meetings = [
+        { title: 'Weekly Sales Sync', time: '10:00 AM', contact: 'Team', notes: 'Review weekly numbers' },
+        { title: 'Lindsey Meeting', time: '3:00 PM', contact: 'Cary McCoy', notes: 'Triple R Brothers - thresholds, hinges' }
+      ];
+      renderMeetings(meetings);
+    }
+
+    function renderMeetings(meetings) {
+      const container = document.getElementById('meetings-list');
+      if (!meetings.length) {
+        container.innerHTML = '<div class="empty">No meetings today</div>';
+        return;
+      }
+      container.innerHTML = meetings.map(m => `
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">${m.title}</span>
+            <span class="card-time">${m.time}</span>
+          </div>
+          <div class="card-body">${m.contact ? '<span class="tag">' + m.contact + '</span>' : ''} ${m.notes || ''}</div>
+        </div>
+      `).join('');
+    }
+
+    // Quote Email Generator
+    function generateQuoteEmail() {
+      const vendor = document.getElementById('vendor-name').value;
+      const products = document.getElementById('products').value;
+      const project = document.getElementById('project-details').value;
+      const name = document.getElementById('sender-name').value;
+
+      const email = `Hi ${vendor.split(' ')[0]},
+
+I hope you're doing well. I'm reaching out regarding a project we're working on.
+
+${project}
+
+Here's what we need:
+${products}
+
+Could you please provide:
+- Unit pricing
+- Lead time
+- Shipping terms (FOB?)
+
+Let me know if you need any additional information.
+
+Regards,
+${name}
+Tradition Sales
+682-560-6635`;
+
+      document.getElementById('quote-result').innerHTML = `
+        <div class="generated-email">${email}</div>
+      `;
+    }
+
+    function copyEmail() {
+      const email = document.querySelector('.generated-email');
+      if (email) {
+        navigator.clipboard.writeText(email.textContent);
+        alert('Copied!');
+      }
+    }
+
+    // Lead Follow-up Tracker
+    function getLeads() {
+      return JSON.parse(localStorage.getItem('leads') || '[]');
+    }
+
+    function saveLeads(leads) {
+      localStorage.setItem('leads', JSON.stringify(leads));
+      renderLeads();
+    }
+
+    function addLead() {
+      const name = document.getElementById('lead-name').value;
+      const company = document.getElementById('lead-company').value;
+      const date = document.getElementById('lead-date').value;
+      const notes = document.getElementById('lead-notes').value;
+
+      if (!name) { alert('Name required'); return; }
+
+      const leads = getLeads();
+      leads.push({ name, company, date, notes, added: new Date().toISOString() });
+      saveLeads(leads);
+
+      // Clear form
+      document.getElementById('lead-name').value = '';
+      document.getElementById('lead-company').value = '';
+      document.getElementById('lead-notes').value = '';
+    }
+
+    function clearLeads() {
+      if (confirm('Clear all leads?')) {
+        localStorage.removeItem('leads');
+        renderLeads();
+      }
+    }
+
+    function renderLeads() {
+      const leads = getLeads();
+      const container = document.getElementById('leads-list');
+      
+      if (!leads.length) {
+        container.innerHTML = '<div class="empty">No leads tracked</div>';
+        return;
+      }
+
+      // Sort by days since contact
+      leads.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      container.innerHTML = leads.map((l, i) => {
+        const daysAgo = Math.floor((new Date() - new Date(l.date)) / (1000*60*60*24));
+        const urgent = daysAgo > 7;
+        return `
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">${l.name}</span>
+              <span class="tag ${urgent ? 'urgent' : ''}">${daysAgo} days ago</span>
+            </div>
+            <div class="card-body">
+              ${l.company || ''}<br>
+              ${l.notes || ''}
+            </div>
+            <button class="btn btn-secondary" style="margin-top:10px;padding:8px 16px;font-size:14px;" onclick="removeLead(${i})">Mark Followed Up</button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function removeLead(index) {
+      const leads = getLeads();
+      leads.splice(index, 1);
+      saveLeads(leads);
+    }
+
+    // Initialize
+    loadMeetings();
+    renderLeads();
+  </script>
+</body>
+</html>

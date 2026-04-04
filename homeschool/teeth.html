@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Little Dentist | Learn Teeth</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #6C63FF;
+      --success: #4ECB71;
+      --gold: #FFD700;
+      --pink: #FFB4B4;
+      --mint: #98D8C8;
+      --cream: #FFF5E6;
+      --tooth: #FFF8F0;
+      --tooth-shadow: #E8DFD0;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Nunito', sans-serif; background: linear-gradient(180deg, #E8F5F9 0%, #FFF5E6 100%); min-height: 100vh; }
+    
+    header { background: linear-gradient(135deg, #FF6B9D, #FF8E72); color: white; padding: 20px; text-align: center; position: sticky; top: 0; z-index: 100; }
+    header h1 { font-size: 28px; font-weight: 800; }
+    header p { font-size: 14px; opacity: 0.9; }
+    .stars-counter { position: absolute; top: 12px; right: 16px; background: rgba(255,255,255,0.25); padding: 8px 14px; border-radius: 20px; font-weight: 700; }
+    
+    nav { display: flex; background: white; padding: 12px 16px; gap: 8px; overflow-x: auto; }
+    nav button { flex-shrink: 0; background: #F8F9FC; border: 2px solid #E8E9F3; padding: 10px 18px; border-radius: 12px; font-family: inherit; font-weight: 600; font-size: 14px; cursor: pointer; color: var(--primary); }
+    nav button.active { background: var(--primary); border-color: var(--primary); color: white; }
+    
+    main { padding: 20px; max-width: 800px; margin: 0 auto; }
+    .tab { display: none; }
+    .tab.active { display: block; }
+    
+    .tooth-diagram { background: white; border-radius: 24px; padding: 30px; box-shadow: 0 8px 30px rgba(0,0,0,0.08); margin-bottom: 20px; text-align: center; }
+    .tooth-diagram h2 { color: var(--primary); margin-bottom: 20px; }
+    
+    .mouth { position: relative; width: 320px; height: 200px; margin: 0 auto 30px; background: linear-gradient(180deg, #FFB4B4 0%, #FF8E72 100%); border-radius: 160px 160px 100px 100px; border: 4px solid #E88060; }
+    .tooth-row { position: absolute; display: flex; justify-content: center; gap: 6px; left: 50%; transform: translateX(-50%); }
+    .top-row { top: 20px; }
+    .bottom-row { bottom: 20px; }
+    .tooth { width: 36px; height: 40px; background: var(--tooth); border-radius: 8px 8px 12px 12px; border: 2px solid var(--tooth-shadow); display: flex; align-items: center; justify-content: center; font-size: 10px; cursor: pointer; transition: all 0.2s; }
+    .tooth:hover { transform: scale(1.15); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+    .tooth.selected { background: var(--mint); border-color: var(--success); }
+    .tooth.incisor { width: 32px; height: 38px; }
+    .tooth.canine { width: 28px; height: 44px; border-radius: 8px 8px 10px 10px; }
+    .tooth.premolar { width: 34px; height: 36px; }
+    .tooth.molar { width: 38px; height: 40px; }
+    
+    .tooth-info { background: white; border-radius: 16px; padding: 20px; text-align: left; border: 3px solid var(--pink); margin-top: 20px; }
+    .tooth-info h3 { color: var(--primary); margin-bottom: 8px; font-size: 18px; }
+    .tooth-info p { color: #666; font-size: 14px; line-height: 1.5; }
+    .tooth-info .emoji { font-size: 40px; margin-bottom: 8px; }
+    
+    .types-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .type-card { background: white; border-radius: 16px; padding: 20px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); cursor: pointer; transition: transform 0.2s; }
+    .type-card:hover { transform: translateY(-4px); }
+    .type-card .emoji { font-size: 48px; margin-bottom: 12px; }
+    .type-card h3 { font-size: 16px; color: var(--primary); margin-bottom: 4px; }
+    .type-card p { font-size: 12px; color: #888; }
+    
+    .quiz-area { background: white; border-radius: 24px; padding: 30px; box-shadow: 0 8px 30px rgba(0,0,0,0.08); text-align: center; }
+    .quiz-question { font-size: 24px; font-weight: 700; color: var(--primary); margin-bottom: 24px; }
+    .quiz-mouth { width: 300px; height: 180px; margin: 0 auto 30px; background: linear-gradient(180deg, #FFB4B4 0%, #FF8E72 100%); border-radius: 150px 150px 80px 80px; border: 4px solid #E88060; position: relative; }
+    .quiz-tooth { position: absolute; width: 40px; height: 45px; background: var(--tooth); border-radius: 8px 8px 12px 12px; border: 3px solid var(--tooth-shadow); cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 9px; }
+    .quiz-tooth:hover { transform: scale(1.1); }
+    .quiz-tooth.correct { background: var(--success); border-color: var(--success); color: white; animation: pop 0.3s; }
+    .quiz-tooth.wrong { background: #FF6B6B; border-color: #FF6B6B; color: white; animation: shake 0.3s; }
+    .quiz-tooth.target { border-color: var(--gold); border-width: 4px; }
+    
+    @keyframes pop { 50% { transform: scale(1.2); } }
+    @keyframes shake { 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+    
+    .quiz-options { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; max-width: 300px; margin: 0 auto; }
+    .quiz-option { background: var(--cream); border: 3px solid var(--pink); padding: 16px; border-radius: 12px; font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+    .quiz-option:hover { background: var(--pink); }
+    .quiz-option.correct { background: var(--success); border-color: var(--success); color: white; }
+    .quiz-option.wrong { background: #FF6B6B; border-color: #FF6B6B; color: white; }
+    
+    .cavity-mouth { width: 300px; height: 160px; margin: 0 auto 30px; background: linear-gradient(180deg, #FFB4B4 0%, #FF8E72 100%); border-radius: 150px 150px 80px 80px; border: 4px solid #E88060; position: relative; }
+    .cavity-tooth { position: absolute; width: 50px; height: 55px; background: var(--tooth); border-radius: 10px 10px 14px 14px; border: 3px solid var(--tooth-shadow); cursor: pointer; overflow: hidden; }
+    .cavity-tooth.has-cavity { background: #4A4A4A; }
+    .cavity-tooth.has-cavity::after { content: ''; position: absolute; font-size: 20px; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 20px; height: 20px; background: #2D2D2D; border-radius: 50%; }
+    .cavity-tooth.filled { background: var(--tooth); }
+    .cavity-tooth.filled::after { display: none; }
+    .cavity-tooth.drill { animation: drill 0.5s; }
+    @keyframes drill { 50% { transform: rotate(-10deg) scale(0.9); } }
+    
+    .drill-tool { font-size: 48px; margin-bottom: 20px; cursor: pointer; user-select: none; display: inline-block; }
+    .drill-tool:active { transform: scale(0.9); }
+    
+    .cavity-instructions { background: var(--cream); padding: 16px; border-radius: 12px; margin-bottom: 20px; font-size: 14px; color: #666; }
+    
+    .progress-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding: 12px 16px; background: white; border-radius: 12px; }
+    .progress-bar .bar { flex: 1; height: 12px; background: #E8E9F3; border-radius: 6px; overflow: hidden; }
+    .progress-bar .fill { height: 100%; background: var(--success); border-radius: 6px; transition: width 0.3s; }
+    .progress-bar .stars { color: var(--gold); font-weight: 700; }
+    
+    .reward-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 200; }
+    .reward-overlay.show { display: flex; }
+    .reward-content { background: white; border-radius: 24px; padding: 40px; text-align: center; animation: bounce 0.5s; }
+    @keyframes bounce { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
+    .reward-content .icon { font-size: 80px; }
+    .reward-content h2 { font-size: 28px; margin: 16px 0; color: var(--gold); }
+    .reward-content button { background: var(--primary); color: white; border: none; padding: 14px 32px; border-radius: 12px; font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer; }
+    
+    .back-btn { background: white; border: 2px solid #E8E9F3; padding: 10px 20px; border-radius: 12px; font-family: inherit; font-weight: 600; cursor: pointer; margin-bottom: 20px; }
+    .result-display { background: var(--mint); padding: 20px; border-radius: 16px; margin-top: 20px; font-size: 18px; font-weight: 700; color: #2D3142; }
+    
+    @media (max-width: 600px) {
+      .types-grid { grid-template-columns: 1fr 1fr; }
+      .type-card { padding: 16px; }
+      .type-card .emoji { font-size: 36px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="stars-counter">⭐ <span id="totalStars">0</span></div>
+    <h1>Little Dentist</h1>
+    <p>Learn Teeth & Fix Cavities!</p>
+  </header>
+  
+  <nav>
+    <button class="active" onclick="showTab('learn')">Learn</button>
+    <button onclick="showTab('quiz')">Quiz</button>
+    <button onclick="showTab('cavity')">Cavities</button>
+  </nav>
+  
+  <main>
+    <div id="tab-learn" class="tab active">
+      <div class="tooth-diagram">
+        <h2>Your Beautiful Smile!</h2>
+        <div class="mouth" id="mouthDisplay"></div>
+        <p style="color:#888;font-size:14px;margin-bottom:20px">Tap any tooth to learn about it</p>
+        <div class="tooth-info" id="toothInfo">
+          <div class="emoji">🦷</div>
+          <h3>Tap a Tooth!</h3>
+          <p>Learn the names and jobs of each tooth in your mouth.</p>
+        </div>
+      </div>
+      <h2 style="margin-bottom:16px;color:var(--primary)">Types of Teeth</h2>
+      <div class="types-grid">
+        <div class="type-card" onclick="showToothType('incisor')"><div class="emoji">🚪</div><h3>Incisors</h3><p>8 teeth - front and center</p></div>
+        <div class="type-card" onclick="showToothType('canine')"><div class="emoji">🐅</div><h3>Canines</h3><p>4 teeth - pointy and sharp</p></div>
+        <div class="type-card" onclick="showToothType('premolar')"><div class="emoji">🦴</div><h3>Premolars</h3><p>8 teeth - in between</p></div>
+        <div class="type-card" onclick="showToothType('molar')"><div class="emoji">🌐</div><h3>Molars</h3><p>12 teeth - big grinders</p></div>
+      </div>
+    </div>
+    
+    <div id="tab-quiz" class="tab">
+      <button class="back-btn" onclick="showTab('learn')">← Back</button>
+      <div class="progress-bar"><div class="stars">⭐ <span id="quizStars">0</span></div><div class="bar"><div class="fill" id="quizProgress" style="width:0%"></div></div><span id="quizCount">0/5</span></div>
+      <div class="quiz-area">
+        <div class="quiz-question" id="quizQuestion">Where are the Incisors?</div>
+        <div class="quiz-mouth" id="quizMouth"></div>
+        <div class="quiz-options" id="quizOptions"></div>
+        <div class="result-display" id="quizResult" style="display:none"></div>
+      </div>
+    </div>
+    
+    <div id="tab-cavity" class="tab">
+      <button class="back-btn" onclick="showTab('learn')">← Back</button>
+      <div class="progress-bar"><div class="stars">⭐ <span id="cavityStars">0</span></div><div class="bar"><div class="fill" id="cavityProgress" style="width:0%"></div></div><span id="cavityCount">0/3</span></div>
+      <div class="quiz-area">
+        <div class="cavity-instructions"><strong>🛠️ Dentist Mode!</strong><br>Tap the drill on the cavity to fill it!</div>
+        <div class="drill-tool" id="drillTool" onclick="useDrill()">🩺</div>
+        <div class="cavity-mouth" id="cavityMouth"></div>
+        <div class="result-display" id="cavityResult" style="display:none"></div>
+      </div>
+    </div>
+  </main>
+  
+  <div class="reward-overlay" id="rewardOverlay">
+    <div class="reward-content">
+      <div class="icon" id="rewardIcon">🎉</div>
+      <h2 id="rewardTitle">Amazing Job!</h2>
+      <p id="rewardText">You earned 5 stars!</p>
+      <button onclick="closeReward()">Keep Going!</button>
+    </div>
+  </div>
+
+<script>
+let state=JSON.parse(localStorage.getItem('dentist-state'))||{stars:0,quizCorrect:0,quizTotal:0,cavitiesFixed:0};
+function saveState(){localStorage.setItem('dentist-state',JSON.stringify(state));document.getElementById('totalStars').textContent=state.stars;}
+
+const teethData={
+  upperRight:[
+    {id:'UR-M3',type:'molar',name:'Upper Right Molar'},
+    {id:'UR-M2',type:'molar',name:'Upper Right Molar'},
+    {id:'UR-PM2',type:'premolar',name:'Upper Right Premolar'},
+    {id:'UR-PM1',type:'premolar',name:'Upper Right Premolar'},
+    {id:'UR-C',type:'canine',name:'Upper Right Canine'},
+    {id:'UR-I2',type:'incisor',name:'Upper Right Incisor'},
+    {id:'UR-I1',type:'incisor',name:'Upper Right Central'},
+  ],
+  upperLeft:[
+    {id:'UL-I1',type:'incisor',name:'Upper Left Central'},
+    {id:'UL-I2',type:'incisor',name:'Upper Left Incisor'},
+    {id:'UL-C',type:'canine',name:'Upper Left Canine'},
+    {id:'UL-PM1',type:'premolar',name:'Upper Left Premolar'},
+    {id:'UL-PM2',type:'premolar',name:'Upper Left Premolar'},
+    {id:'UL-M1',type:'molar',name:'Upper Left Molar'},
+    {id:'UL-M2',type:'molar',name:'Upper Left Molar'},
+  ],
+  lowerLeft:[
+    {id:'LL-M2',type:'molar',name:'Lower Left Molar'},
+    {id:'LL-M1',type:'molar',name:'Lower Left Molar'},
+    {id:'LL-PM2',type:'premolar',name:'Lower Left Premolar'},
+    {id:'LL-PM1',type:'premolar',name:'Lower Left Premolar'},
+    {id:'LL-C',type:'canine',name:'Lower Left Canine'},
+    {id:'LL-I2',type:'incisor',name:'Lower Left Incisor'},
+    {id:'LL-I1',type:'incisor',name:'Lower Left Central'},
+  ],
+  lowerRight:[
+    {id:'LR-I1',type:'incisor',name:'Lower Right Central'},
+    {id:'LR-I2',type:'incisor',name:'Lower Right Incisor'},
+    {id:'LR-C',type:'canine',name:'Lower Right Canine'},
+    {id:'LR-PM1',type:'premolar',name:'Lower Right Premolar'},
+    {id:'LR-PM2',type:'premolar',name:'Lower Right Premolar'},
+    {id:'LR-M1',type:'molar',name:'Lower Right Molar'},
+    {id:'LR-M2',type:'molar',name:'Lower Right Molar'},
+  ]
+};
+
+const toothTypes={
+  incisor:{emoji:'🚪',name:'Incisors',description:'Your 8 incisors are the front teeth. They help you bite into apples and smile pretty!',jobs:'Biting • Cutting • Beautiful smile'},
+  canine:{emoji:'🐅',name:'Canines',description:'Your 4 canine teeth are pointy and sharp. They help you tear food like steak!',jobs:'Tearing food • Pointy smile'},
+  premolar:{emoji:'🦴',name:'Premolars',description:'Your 8 premolars are between your canines and molars. They help crush and grind food!',jobs:'Crushing • Grinding'},
+  molar:{emoji:'🌐',name:'Molars',description:'Your 12 molars are the biggest teeth in the back. They grind up food like a food processor!',jobs:'Grinding • Chewing'}
+};
+
+function showTab(tab){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));document.getElementById('tab-'+tab).classList.add('active');event.target.classList.add('active');if(tab==='learn')renderMouth();if(tab==='quiz')startQuiz();if(tab==='cavity')startCavityGame();}
+
+function renderMouth(){
+  const mouth=document.getElementById('mouthDisplay');
+  mouth.innerHTML='';
+  const topRow=document.createElement('div');topRow.className='tooth-row top-row';
+  [...teethData.upperRight,...teethData.upperLeft].forEach(t=>{const tooth=document.createElement('div');tooth.className='tooth '+t.type;tooth.id=t.id;tooth.innerHTML=t.type[0].toUpperCase();tooth.onclick=()=>showToothInfo(t);topRow.appendChild(tooth);});
+  mouth.appendChild(topRow);
+  const bottomRow=document.createElement('div');bottomRow.className='tooth-row bottom-row';
+  [...teethData.lowerLeft,...teethData.lowerRight].forEach(t=>{const tooth=document.createElement('div');tooth.className='tooth '+t.type;tooth.id=t.id;tooth.innerHTML=t.type[0].toUpperCase();tooth.style.transform='rotate(180deg)';tooth.onclick=()=>showToothInfo(t);bottomRow.appendChild(tooth);});
+  mouth.appendChild(bottomRow);
+}
+
+function showToothInfo(t){
+  document.querySelectorAll('.tooth').forEach(el=>el.classList.remove('selected'));
+  document.getElementById(t.id).classList.add('selected');
+  const type=toothTypes[t.type];
+  document.getElementById('toothInfo').innerHTML='<div class="emoji">'+type.emoji+'</div><h3>'+t.name+'</h3><p>'+type.description+'</p><p style="margin-top:12px;color:var(--primary);font-weight:700">'+type.jobs+'</p>';
+}
+
+function showToothType(type){
+  document.querySelectorAll('.tooth').forEach(el=>el.classList.remove('selected'));
+  const t=toothTypes[type];
+  document.getElementById('toothInfo').innerHTML='<div class="emoji">'+t.emoji+'</div><h3>'+t.name+'</h3><p>'+t.description+'</p><p style="margin-top:12px;color:var(--primary);font-weight:700">'+t.jobs+'</p>';
+}
+
+const quizQuestions=[
+  {question:'Where are the Incisors?',correct:'Front teeth',options:['Front teeth','Back teeth','Side teeth','Top teeth'],targets:['UR-I1','UR-I2','UL-I1','UL-I2','LR-I1','LR-I2','LL-I1','LL-I2']},
+  {question:'Where are the Canines?',correct:'Pointy teeth',options:['Front teeth','Pointy teeth','Back teeth','Bottom teeth'],targets:['UR-C','UL-C','LL-C','LR-C']},
+  {question:'Where are the Molars?',correct:'Back teeth',options:['Front teeth','Side teeth','Back teeth','Middle teeth'],targets:['UR-M2','UR-M3','UL-M1','UL-M2','LL-M1','LL-M2','LR-M1','LR-M2']},
+  {question:'Where are the Premolars?',correct:'Between',options:['Front teeth','Between canines and molars','Back teeth','Top teeth'],targets:['UR-PM1','UR-PM2','UL-PM1','UL-PM2','LL-PM1','LL-PM2','LR-PM1','LR-PM2']},
+];
+
+let currentQ=0;
+
+function startQuiz(){currentQ=0;renderQuiz();}
+
+function renderQuiz(){
+  if(currentQ>=quizQuestions.length){
+    const pct=Math.round(state.quizCorrect/quizQuestions.length*100);
+    document.getElementById('quizProgress').style.width='100%';
+    document.getElementById('quizCount').textContent=currentQ+'/5';
+    document.getElementById('quizResult').innerHTML='🎉 You got '+state.quizCorrect+' out of '+quizQuestions.length+'!<br><span style="font-size:14px;color:#888">'+(pct>=80?'Amazing!':pct>=60?'Good job!':'Keep practicing!')+'</span>';
+    document.getElementById('quizResult').style.display='block';
+    if(pct>=60)showReward('🦷','Tooth Expert!',state.quizCorrect*3+' stars earned!');
+    return;
+  }
+  const q=quizQuestions[currentQ];
+  document.getElementById('quizQuestion').textContent=q.question;
+  document.getElementById('quizStars').textContent=state.quizCorrect*3;
+  document.getElementById('quizProgress').style.width=(currentQ/quizQuestions.length*100)+'%';
+  document.getElementById('quizCount').textContent=currentQ+'/5';
+  document.getElementById('quizResult').style.display='none';
+  const mouth=document.getElementById('quizMouth');
+  mouth.innerHTML='';
+  const allTeeth=[...teethData.upperRight,...teethData.upperLeft];
+  allTeeth.forEach((t,i)=>{const tooth=document.createElement('div');tooth.className='quiz-tooth';tooth.id='q-'+t.id;tooth.textContent=t.type[0].toUpperCase();tooth.style.top='15px';tooth.style.left=(20+i*36)+'px';tooth.onclick=()=>checkQuizAnswer(t,q);mouth.appendChild(tooth);});
+  const lowerTeeth=[...teethData.lowerLeft,...teethData.lowerRight];
+  lowerTeeth.forEach((t,i)=>{const tooth=document.createElement('div');tooth.className='quiz-tooth';tooth.id='q-'+t.id;tooth.textContent=t.type[0].toUpperCase();tooth.style.bottom='15px';tooth.style.left=(20+i*36)+'px';tooth.style.transform='rotate(180deg)';tooth.onclick=()=>checkQuizAnswer(t,q);mouth.appendChild(tooth);});
+  setTimeout(()=>{q.targets.forEach(id=>{const el=document.getElementById('q-'+id);if(el)el.classList.add('target');});},100);
+  document.getElementById('quizOptions').innerHTML=q.options.map(o=>'<button class="quiz-option" onclick="selectQuizOption(\''+o+'\',\''+q.correct+'\')">'+o+'</button>').join('');
+}
+
+function selectQuizOption(selected,correct){
+  document.querySelectorAll('.quiz-option').forEach(b=>{b.disabled=true;if(b.textContent===selected){b.classList.add(selected===correct?'correct':'wrong');}if(b.textContent===correct){b.classList.add('correct');}});
+  if(selected===correct){state.quizCorrect++;state.stars+=3;saveState();}
+  currentQ++;saveState();
+  setTimeout(renderQuiz,1500);
+}
+
+function checkQuizAnswer(t,q){
+  const el=document.getElementById('q-'+t.id);
+  if(q.targets.includes(t.id)){el.classList.add('correct');state.quizCorrect++;state.stars+=3;}else{el.classList.add('wrong');}
+  currentQ++;saveState();
+  setTimeout(renderQuiz,1000);
+}
+
+// Cavity Game
+let cavityIndex=0;
+let drillActive=false;
+const cavityPositions=[{id:'cav1',top:20,left:50},{id:'cav2',top:20,left:130},{id:'cav3',top:20,left:210}];
+
+function startCavityGame(){cavityIndex=0;state.cavitiesFixed=0;renderCavityMouth();}
+
+function renderCavityMouth(){
+  if(cavityIndex>=3){
+    document.getElementById('cavityProgress').style.width='100%';
+    document.getElementById('cavityCount').textContent='3/3';
+    document.getElementById('cavityResult').innerHTML='🎉 All cavities fixed! You\'re a great dentist!<br><span style="font-size:14px;color:#888">'+state.cavitiesFixed*5+' stars earned!</span>';
+    document.getElementById('cavityResult').style.display='block';
+    showReward('🩺','Super Dentist!',state.cavitiesFixed*5+' stars earned!');
+    return;
+  }
+  document.getElementById('cavityStars').textContent=state.cavitiesFixed*5;
+  document.getElementById('cavityProgress').style.width=(cavityIndex/3*100)+'%';
+  document.getElementById('cavityCount').textContent=cavityIndex+'/3';
+  document.getElementById('cavityResult').style.display='none';
+  const mouth=document.getElementById('cavityMouth');
+  mouth.innerHTML='';
+  cavityPositions.forEach((pos,i)=>{
+    const tooth=document.createElement('div');
+    tooth.className='cavity-tooth'+(i<cavityIndex?' filled': has-cavity');
+    tooth.id=pos.id;
+    tooth.style.top=pos.top+'px';
+    tooth.style.left=pos.left+'px';
+    if(i<cavityIndex){tooth.classList.add('filled');}
+    if(i===cavityIndex){tooth.classList.add('has-cavity');}
+    mouth.appendChild(tooth);
+  });
+}
+
+function useDrill(){
+  if(drillActive)return;
+  const targetPos=cavityPositions[cavityIndex];
+  const target=document.getElementById(targetPos.id);
+  if(target&&!target.classList.contains('filled')){
+    drillActive=true;
+    target.classList.add('drill');
+    setTimeout(()=>{target.classList.remove('drill');target.classList.add('filled');state.cavitiesFixed++;state.stars+=5;saveState();cavityIndex++;drillActive=false;renderCavityMouth();},500);
+  }
+}
+
+function showReward(icon,title,text){
+  document.getElementById('rewardIcon').textContent=icon;
+  document.getElementById('rewardTitle').textContent=title;
+  document.getElementById('rewardText').textContent=text;
+  document.getElementById('rewardOverlay').classList.add('show');
+}
+
+function closeReward(){document.getElementById('rewardOverlay').classList.remove('show');showTab('learn');}
+
+renderMouth();
+saveState();
+</script>
+</body>
+</html>

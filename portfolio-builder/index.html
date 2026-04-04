@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portfolio Builder | BTC, ASST, SATA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root { 
+      --bg-primary: #0a0a0a; --bg-secondary: #111; --bg-tertiary: #1a1a1a; 
+      --border: #222; --text-primary: #fff; --text-secondary: #888; 
+      --btc: #f7931a; --asst: #00d4aa; --sata: #8b5cf6;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; }
+    
+    header { background: var(--bg-secondary); border-bottom: 1px solid var(--border); padding: 16px 24px; position: sticky; top: 0; z-index: 100; }
+    .header-inner { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+    .logo { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .logo-icon { width: 32px; height: 32px; background: linear-gradient(135deg, var(--btc), var(--asst)); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+    nav { display: flex; gap: 20px; }
+    nav a { color: var(--text-secondary); font-size: 14px; font-weight: 500; cursor: pointer; padding: 8px 0; }
+    nav a:hover, nav a.active { color: var(--btc); }
+    
+    .tabs-container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    
+    .hero { padding: 50px 24px; text-align: center; background: radial-gradient(ellipse at top, var(--bg-secondary) 0%, var(--bg-primary) 70%); }
+    .hero h1 { font-size: 36px; font-weight: 700; margin-bottom: 12px; }
+    .hero h1 span { background: linear-gradient(90deg, var(--btc), var(--asst)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero p { font-size: 16px; color: var(--text-secondary); }
+    
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin: 24px 0; }
+    @media(max-width: 768px) { .stats-grid { grid-template-columns: 1fr 1fr; } }
+    .stat-card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; }
+    .stat-card .label { font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; }
+    .stat-card .value { font-size: 24px; font-weight: 700; }
+    .stat-card .sub { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+    .stat-card.btc .value { color: var(--btc); }
+    .stat-card.asst .value { color: var(--asst); }
+    .stat-card.sata .value { color: var(--sata); }
+    
+    .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 16px; flex-wrap: wrap; }
+    .section-title { font-size: 22px; font-weight: 600; }
+    .chart-btn { background: var(--bg-tertiary); border: 1px solid var(--border); color: var(--text-secondary); padding: 8px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; }
+    .chart-btn:hover { background: var(--bg-secondary); color: var(--text-primary); }
+    .chart-btn.active { background: var(--btc); color: var(--bg-primary); border-color: var(--btc); }
+    
+    .chart-container { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 16px; padding: 24px; height: 350px; }
+    
+    .legend-bar { display: flex; gap: 20px; justify-content: center; margin-top: 16px; }
+    .legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-secondary); cursor: pointer; }
+    .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
+    
+    /* Builder */
+    .portfolio-builder { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 16px; padding: 32px; }
+    .builder-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 32px; }
+    @media(max-width: 768px) { .builder-grid { grid-template-columns: 1fr; } }
+    
+    .asset-input { background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+    .asset-input h3 { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; font-size: 16px; }
+    .asset-input.btc h3 { color: var(--btc); }
+    .asset-input.asst h3 { color: var(--asst); }
+    .asset-input.sata h3 { color: var(--sata); }
+    .asset-input .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .asset-input.btc .dot { background: var(--btc); }
+    .asset-input.asst .dot { background: var(--asst); }
+    .asset-input.sata .dot { background: var(--sata); }
+    .asset-input label { font-size: 13px; color: var(--text-secondary); display: block; margin-bottom: 6px; }
+    .asset-input input { width: 100%; background: var(--bg-primary); border: 1px solid var(--border); border-radius: 8px; padding: 12px; color: var(--text-primary); font-size: 16px; }
+    .asset-input input:focus { outline: none; border-color: var(--btc); }
+    .asset-input.asst input:focus { border-color: var(--asst); }
+    .asset-input.sata input:focus { border-color: var(--sata); }
+    .asset-input .holdings { margin-top: 12px; font-size: 14px; color: var(--text-secondary); }
+    .asset-input .holdings span { font-weight: 600; color: var(--text-primary); }
+    
+    .portfolio-summary { background: var(--bg-tertiary); border-radius: 12px; padding: 24px; }
+    .portfolio-summary h3 { font-size: 16px; margin-bottom: 16px; color: var(--text-secondary); }
+    .summary-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .summary-row:last-child { border-bottom: none; }
+    .summary-row .label { color: var(--text-secondary); }
+    .summary-row .value { font-weight: 600; }
+    .summary-row.total { font-size: 18px; margin-top: 8px; }
+    .summary-row.total .value { color: var(--btc); font-size: 24px; }
+    
+    .allocation-container { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 24px; }
+    @media(max-width: 768px) { .allocation-container { grid-template-columns: 1fr; } }
+    .allocation-chart { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 16px; padding: 24px; height: 250px; }
+    .allocation-legend { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 16px; padding: 24px; }
+    .alloc-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .alloc-item:last-child { border-bottom: none; }
+    .alloc-item .name { display: flex; align-items: center; gap: 8px; }
+    .alloc-item .percent { font-weight: 600; }
+    .alloc-item .value { color: var(--text-secondary); font-size: 14px; }
+    
+    /* Performance */
+    .perf-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 24px; }
+    @media(max-width: 768px) { .perf-grid { grid-template-columns: 1fr; } }
+    .perf-card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+    .perf-card h4 { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+    .perf-card.btc h4 { color: var(--btc); }
+    .perf-card.asst h4 { color: var(--asst); }
+    .perf-card.sata h4 { color: var(--sata); }
+    .perf-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+    .perf-row:last-child { border-bottom: none; }
+    .perf-row .label { color: var(--text-secondary); }
+    .perf-row .value { font-weight: 500; }
+    
+    footer { text-align: center; padding: 32px; color: var(--text-secondary); font-size: 13px; margin-top: 48px; border-top: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="logo"><div class="logo-icon">$</div>Portfolio Builder</div>
+      <nav>
+        <a onclick="showTab('tracker')" class="active">Tracker</a>
+        <a onclick="showTab('builder')">Builder</a>
+        <a onclick="showTab('performance')">Performance</a>
+      </nav>
+    </div>
+  </header>
+
+  <div id="tracker" class="tab-content active">
+    <section class="hero">
+      <h1>Build Your <span>Portfolio</span></h1>
+      <p>Track and optimize your BTC, ASST, and SATA holdings</p>
+    </section>
+    <section class="tabs-container">
+      <div class="stats-grid">
+        <div class="stat-card btc">
+          <div class="label">BTC Allocation</div>
+          <div class="value" id="btcAlloc">0%</div>
+          <div class="sub" id="btcValue">$0</div>
+        </div>
+        <div class="stat-card asst">
+          <div class="label">ASST Allocation</div>
+          <div class="value" id="asstAlloc">0%</div>
+          <div class="sub" id="asstValue">$0</div>
+        </div>
+        <div class="stat-card sata">
+          <div class="label">SATA Allocation</div>
+          <div class="value" id="sataAlloc">0%</div>
+          <div class="sub" id="sataValue">$0</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Total Portfolio</div>
+          <div class="value" id="totalValue">$0</div>
+          <div class="sub">Enter holdings below</div>
+        </div>
+      </div>
+      
+      <div class="section-header">
+        <h2 class="section-title">Allocation Breakdown</h2>
+        <button class="chart-btn" onclick="resetBuilder()">Reset</button>
+      </div>
+      <div class="chart-container">
+        <canvas id="allocationChart"></canvas>
+      </div>
+      <div class="legend-bar">
+        <div class="legend-item"><div class="legend-dot" style="background: var(--btc)"></div> BTC</div>
+        <div class="legend-item"><div class="legend-dot" style="background: var(--asst)"></div> ASST</div>
+        <div class="legend-item"><div class="legend-dot" style="background: var(--sata)"></div> SATA</div>
+      </div>
+    </section>
+  </div>
+
+  <div id="builder" class="tab-content">
+    <section class="hero">
+      <h1>Portfolio <span>Builder</span></h1>
+      <p>Enter your holdings to see allocation breakdown</p>
+    </section>
+    <section class="tabs-container">
+      <div class="portfolio-builder">
+        <div class="builder-grid">
+          <div class="asset-input btc">
+            <h3><div class="dot"></div>Bitcoin (BTC)</h3>
+            <label>Amount (BTC)</label>
+            <input type="number" id="btcAmount" placeholder="0.00" step="0.0001" min="0" oninput="updatePortfolio()">
+            <div class="holdings">≈ <span id="btcUsd">$0</span> USD</div>
+          </div>
+          <div class="asset-input asst">
+            <h3><div class="dot"></div>ASST</h3>
+            <label>Amount</label>
+            <input type="number" id="asstAmount" placeholder="0.00" step="0.01" min="0" oninput="updatePortfolio()">
+            <div class="holdings">≈ <span id="asstUsd">$0</span> USD</div>
+          </div>
+          <div class="asset-input sata">
+            <h3><div class="dot"></div>SATA</h3>
+            <label>Amount</label>
+            <input type="number" id="sataAmount" placeholder="0.00" step="0.01" min="0" oninput="updatePortfolio()">
+            <div class="holdings">≈ <span id="sataUsd">$0</span> USD</div>
+          </div>
+        </div>
+        
+        <div class="portfolio-summary">
+          <h3>Portfolio Summary</h3>
+          <div class="summary-row"><span class="label">Total BTC Value</span><span class="value" id="summaryBtc">$0</span></div>
+          <div class="summary-row"><span class="label">Total ASST Value</span><span class="value" id="summaryAsst">$0</span></div>
+          <div class="summary-row"><span class="label">Total SATA Value</span><span class="value" id="summarySata">$0</span></div>
+          <div class="summary-row total"><span class="label">Portfolio Total</span><span class="value" id="summaryTotal">$0</span></div>
+        </div>
+        
+        <div class="allocation-container">
+          <div class="allocation-chart"><canvas id="pieChart"></canvas></div>
+          <div class="allocation-legend">
+            <h3 style="margin-bottom: 16px; color: var(--text-secondary);">Allocation</h3>
+            <div class="alloc-item">
+              <span class="name"><div class="legend-dot" style="background: var(--btc); width: 8px; height: 8px;"></div> BTC</span>
+              <div><span class="percent" id="allocBtcPct">0%</span><br><span class="value" id="allocBtcVal">$0</span></div>
+            </div>
+            <div class="alloc-item">
+              <span class="name"><div class="legend-dot" style="background: var(--asst); width: 8px; height: 8px;"></div> ASST</span>
+              <div><span class="percent" id="allocAsstPct">0%</span><br><span class="value" id="allocAsstVal">$0</span></div>
+            </div>
+            <div class="alloc-item">
+              <span class="name"><div class="legend-dot" style="background: var(--sata); width: 8px; height: 8px;"></div> SATA</span>
+              <div><span class="percent" id="allocSataPct">0%</span><br><span class="value" id="allocSataVal">$0</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div id="performance" class="tab-content">
+    <section class="hero">
+      <h1>Performance <span>Analysis</span></h1>
+      <p>Track returns and price data</p>
+    </section>
+    <section class="tabs-container">
+      <div class="section-header">
+        <h2 class="section-title">Price Chart</h2>
+        <div class="chart-controls">
+          <button class="chart-btn" onclick="setPerfRange('1W')">1W</button>
+          <button class="chart-btn" onclick="setPerfRange('1M')">1M</button>
+          <button class="chart-btn active" onclick="setPerfRange('3M')">3M</button>
+          <button class="chart-btn" onclick="setPerfRange('ALL')">ALL</button>
+        </div>
+      </div>
+      <div class="chart-container" style="height: 300px;"><canvas id="perfChart"></canvas></div>
+      
+      <div class="perf-grid">
+        <div class="perf-card btc">
+          <h4>Bitcoin (BTC)</h4>
+          <div class="perf-row"><span class="label">Current Price</span><span class="value" id="btcPrice">$105,000</span></div>
+          <div class="perf-row"><span class="label">24h Change</span><span class="value" id="btc24h">+2.4%</span></div>
+        </div>
+        <div class="perf-card asst">
+          <h4>ASST</h4>
+          <div class="perf-row"><span class="label">Current Price</span><span class="value" id="asstPrice">$2.50</span></div>
+          <div class="perf-row"><span class="label">24h Change</span><span class="value" id="asst24h">+1.2%</span></div>
+        </div>
+        <div class="perf-card sata">
+          <h4>SATA</h4>
+          <div class="perf-row"><span class="label">Current Price</span><span class="value" id="sataPrice">$0.85</span></div>
+          <div class="perf-row"><span class="label">24h Change</span><span class="value" id="sata24h">-0.8%</span></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer><p>Portfolio calculations are estimates. Data for demonstration purposes.</p></footer>
+
+  <script>
+    const prices = { BTC: 105000, ASST: 2.50, SATA: 0.85 };
+    let allocationChart, pieChart, perfChart;
+    
+    function showTab(tab) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('nav a').forEach(n => n.classList.remove('active'));
+      document.getElementById(tab).classList.add('active');
+      document.querySelector(`nav a[onclick="showTab('${tab}')"]`).classList.add('active');
+    }
+    
+    function updatePortfolio() {
+      const btcAmt = parseFloat(document.getElementById('btcAmount').value) || 0;
+      const asstAmt = parseFloat(document.getElementById('asstAmount').value) || 0;
+      const sataAmt = parseFloat(document.getElementById('sataAmount').value) || 0;
+      
+      const btcVal = btcAmt * prices.BTC;
+      const asstVal = asstAmt * prices.ASST;
+      const sataVal = sataAmt * prices.SATA;
+      const total = btcVal + asstVal + sataVal;
+      
+      document.getElementById('btcUsd').textContent = '$' + btcVal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      document.getElementById('asstUsd').textContent = '$' + asstVal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      document.getElementById('sataUsd').textContent = '$' + sataVal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      
+      document.getElementById('summaryBtc').textContent = '$' + btcVal.toLocaleString();
+      document.getElementById('summaryAsst').textContent = '$' + asstVal.toLocaleString();
+      document.getElementById('summarySata').textContent = '$' + sataVal.toLocaleString();
+      document.getElementById('summaryTotal').textContent = '$' + total.toLocaleString();
+      
+      document.getElementById('btcAlloc').textContent = total > 0 ? Math.round(btcVal/total*100) + '%' : '0%';
+      document.getElementById('asstAlloc').textContent = total > 0 ? Math.round(asstVal/total*100) + '%' : '0%';
+      document.getElementById('sataAlloc').textContent = total > 0 ? Math.round(sataVal/total*100) + '%' : '0%';
+      document.getElementById('btcValue').textContent = '$' + btcVal.toLocaleString();
+      document.getElementById('asstValue').textContent = '$' + asstVal.toLocaleString();
+      document.getElementById('sataValue').textContent = '$' + sataVal.toLocaleString();
+      document.getElementById('totalValue').textContent = '$' + total.toLocaleString();
+      
+      document.getElementById('allocBtcPct').textContent = total > 0 ? Math.round(btcVal/total*100) + '%' : '0%';
+      document.getElementById('allocAsstPct').textContent = total > 0 ? Math.round(asstVal/total*100) + '%' : '0%';
+      document.getElementById('allocSataPct').textContent = total > 0 ? Math.round(sataVal/total*100) + '%' : '0%';
+      document.getElementById('allocBtcVal').textContent = '$' + btcVal.toLocaleString();
+      document.getElementById('allocAsstVal').textContent = '$' + asstVal.toLocaleString();
+      document.getElementById('allocSataVal').textContent = '$' + sataVal.toLocaleString();
+      
+      updateCharts(btcVal, asstVal, sataVal, total);
+    }
+    
+    function updateCharts(btcVal, asstVal, sataVal, total) {
+      if (allocationChart) {
+        allocationChart.data.datasets[0].data = total > 0 ? [btcVal, asstVal, sataVal] : [1, 0, 0];
+        allocationChart.update();
+      }
+      if (pieChart) {
+        pieChart.data.datasets[0].data = total > 0 ? [btcVal, asstVal, sataVal] : [1, 0, 0];
+        pieChart.update();
+      }
+    }
+    
+    function resetBuilder() {
+      document.getElementById('btcAmount').value = '';
+      document.getElementById('asstAmount').value = '';
+      document.getElementById('sataAmount').value = '';
+      updatePortfolio();
+    }
+    
+    function setPerfRange(range) {
+      document.querySelectorAll('#performance .chart-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+    
+    function initCharts() {
+      const allocCtx = document.getElementById('allocationChart').getContext('2d');
+      allocationChart = new Chart(allocCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ['BTC', 'ASST', 'SATA'],
+          datasets: [{ data: [1, 0, 0], backgroundColor: ['#f7931a', '#00d4aa', '#8b5cf6'], borderWidth: 0 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+      });
+      
+      const pieCtx = document.getElementById('pieChart').getContext('2d');
+      pieChart = new Chart(pieCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ['BTC', 'ASST', 'SATA'],
+          datasets: [{ data: [1, 0, 0], backgroundColor: ['#f7931a', '#00d4aa', '#8b5cf6'], borderWidth: 0 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+      });
+      
+      const perfCtx = document.getElementById('perfChart').getContext('2d');
+      perfChart = new Chart(perfCtx, {
+        type: 'line',
+        data: {
+          labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+          datasets: [
+            { label: 'BTC', data: [95000, 98000, 102000, 100000, 103000, 105000], borderColor: '#f7931a', backgroundColor: 'rgba(247,147,26,0.1)', tension: 0.4, fill: true },
+            { label: 'ASST', data: [2.2, 2.3, 2.4, 2.35, 2.45, 2.50], borderColor: '#00d4aa', backgroundColor: 'rgba(0,212,170,0.1)', tension: 0.4, fill: true, yAxisID: 'y1' },
+            { label: 'SATA', data: [0.80, 0.82, 0.85, 0.83, 0.86, 0.85], borderColor: '#8b5cf6', backgroundColor: 'rgba(139,92,246,0.1)', tension: 0.4, fill: true, yAxisID: 'y1' }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          scales: {
+            y: { type: 'linear', position: 'left', ticks: { color: '#888', callback: v => '$' + v.toLocaleString() }, grid: { color: '#222' } },
+            y1: { type: 'linear', position: 'right', ticks: { color: '#888' }, grid: { display: false } },
+            x: { ticks: { color: '#888' }, grid: { display: false } }
+          },
+          plugins: { legend: { labels: { color: '#888' } } }
+        }
+      });
+    }
+    
+    document.addEventListener('DOMContentLoaded', initCharts);
+  </script>
+</body>
+</html>

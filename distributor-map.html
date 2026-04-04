@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AF Distributors — Texas</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Helvetica, Arial, sans-serif; }
+    #header {
+      background: #1a365d;
+      color: white;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    #header img { height: 40px; }
+    #header h1 { font-size: 18px; font-weight: 700; }
+    #header p { font-size: 12px; color: #c8d0db; }
+    #sidebar {
+      position: absolute;
+      left: 0; top: 64px; bottom: 0;
+      width: 280px;
+      background: white;
+      overflow-y: auto;
+      border-right: 1px solid #e2e8f0;
+      z-index: 1000;
+    }
+    #sidebar h3 {
+      background: #c05621;
+      color: white;
+      padding: 8px 14px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .dist-item {
+      padding: 10px 14px;
+      border-bottom: 1px solid #f0f0f0;
+      cursor: pointer;
+    }
+    .dist-item:hover { background: #f7fafc; }
+    .dist-item.active { background: #eef2ff; border-left: 3px solid #1a365d; }
+    .dist-item .company { font-weight: 600; font-size: 13px; color: #1a365d; }
+    .dist-item .address { font-size: 11px; color: #666; margin-top: 2px; }
+    .dist-item .phone { font-size: 11px; color: #1a365d; margin-top: 2px; }
+    .dist-item .tag {
+      display: inline-block;
+      background: #e2e8f0;
+      color: #4a5568;
+      font-size: 9px;
+      padding: 1px 6px;
+      border-radius: 10px;
+      margin-top: 3px;
+    }
+    #search {
+      padding: 8px 14px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    #search input {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      font-size: 13px;
+      outline: none;
+    }
+    #search input:focus { border-color: #1a365d; }
+    #count {
+      padding: 6px 14px;
+      font-size: 11px;
+      color: #888;
+      background: #f7fafc;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    #map { position: absolute; left: 280px; top: 64px; right: 0; bottom: 0; }
+    .popup-body { font-size: 12px; line-height: 1.5; }
+    .popup-body h4 { color: #1a365d; font-size: 14px; margin-bottom: 4px; }
+    .popup-body p { color: #666; margin: 2px 0; }
+    .popup-body .tag { display: inline-block; background: #e2e8f0; color: #4a5568; font-size: 10px; padding: 1px 6px; border-radius: 10px; margin-top: 4px; }
+  </style>
+</head>
+<body>
+
+<div id="header">
+  <div>
+    <h1>American Flashings — Distributor Outreach Map</h1>
+    <p>Texas roofing supply distributors south of Temple, TX | 43 locations</p>
+  </div>
+</div>
+
+<div id="sidebar">
+  <div id="search">
+    <input type="text" id="searchInput" placeholder="Search distributors..." oninput="filterList()" />
+  </div>
+  <div id="count">Showing <span id="visibleCount">43</span> of 43</div>
+
+  <h3>Austin Metro</h3>
+  <div class="dist-item" onclick="focusMarker(0)">
+    <div class="company">ABC Supply — Austin (St Johns)</div>
+    <div class="address">901 E St Johns Ave, Austin TX 78753</div>
+    <div class="phone">(512) 454-0400</div>
+    <div class="tag">AUSTIN</div>
+  </div>
+  <div class="dist-item" onclick="focusMarker(1)">
+    <div class="company">ABC Supply — Austin (Bratton)</div>
+    <div class="address">15508 Bratton Ln, Austin TX 78728</div>
+    <div class="tag">AUSTIN</div>
+  </div>
+  <div class="dist-item" onclick="focusMarker(2)">
+    <div class="company">ABC Supply — Austin (Winnebago)</div>
+    <div class="address">4905 Winnebago Ln, Austin TX 78744</div>
+    <div class="tag">AUSTIN</div>
+  </div>
+  <div class="dist-item" onclick="focusMarker(3)">
+    <div class="company">L&amp;W Supply — Austin</div>
+    <div class="address">503 Industrial Blvd, Austin TX 78745</div>
+    <div class="phone">(512) 444-1804</div>
+    <div class="tag">AUSTIN</div>
+  </div>
+  <div class="dist-item" onclick="focusMarker(4)">
+    <div class="company">Roofing Supply Group — Austin</div>
+    <div class="address">8319 N Lamar Blvd, Austin TX 78753</div>
+    <div class="tag">AUSTIN</div>
+  </div>
+  <div class="dist-item" onclick="focusMarker(5)">
+    <div class="company">Budget Roofing Supply — Austin</div>
+    <div class="address">Austin, TX</div>
+    <div class="tag">AUSTIN</div>
+  </div>
+  <div class="dist-item" onclick="focusMarker(6)">
+    <div class="company">SRS Building Products — Austin</div>
+    <div class="address">Austin, TX</div>
+    <div class="tag">AUSTIN</div>
+  </div>
+  <div class="dist-item" onclick="focusMarker(7)">
+    <div class="company">Beacon / QXO — Austin</div>
+    <div class="address">Austin, TX</div>
+    <div class="tag">AUSTIN</div>
+  </div>
+
+  <h3>Bryan / College Station</h3>
+  <div class="dist-item" onclick="focusMarker(8)">
+    <div class="company">QXO / Beacon — Bryan</div>
+    <div class="address">4100 E State Hwy 21, Bryan TX 77808</div>
+    <div class="tag">BRYAN</div>
+  </div>
+  <div class="dist-item" onclick="focusMarker(9)">
+    <div class="company">SRS Building Products — College Station</div>
+    <div class="address">College Station, TX</div>
+    <div class="tag">BRYAN</div>
+  </div>
+  <div class="dist-item" onclick="focusMarker(10)">
+    <div class="company">Builders FirstSource — College Station</div>
+    <div class="address">College Station, TX</div>
+    <div class="tag">BRYAN</div>
+  </div>
+  <div class="dist-item" onclick="focusMarker(11)">
+    <div class="company">McCoy's Building Supply — Bryan</div>
+    <div class="address">Bryan, TX</div>
+    <div class="tag">BRYAN</div>
+  </div>
+
+  <h3>San Antonio</h3>
+  <div class="dist-item" onclick="focusMarker(12)">
+    <div class="company">SRS Building Products — San Antonio</div>
+    <div class="address">San Antonio, TX</div>
+    <div class="tag">SAN ANTONIO</div>
+  </div>
+  <div class="dist-item" onclick="focusMarker(13)">
+    <div class="company">L&amp;W Supply — Schertz (San Antonio)</div>
+    <div class="address">7059 Pipestone Rd, Schertz TX 78154</div>
+    <div class="tag">SAN ANTONIO</div>
+  </div>
+  <div class="dist-item" onclick="focusMarker(14)">
+    <div class="company">84 Lumber — San Antonio (FM 2252)</div>
+    <div class="address">18100 Fm 2252, San Antonio TX</div>
+    <div class="tag">SAN ANTONIO</div>
+  </div>
+  <div class="dist-item" onclick="focusMarker(15)">
+    <div class="company">84 Lumber — San Antonio (Riverside)</div>
+    <div class="address">327 Riverside Dr, San Antonio TX</div>
+    <div class="tag">SAN ANTONIO</div>
+  </div>
+  <div class="dist-item" onclick="focusMarker(16)">
+    <div class="company">Texas Building Supply / US LBM — San Antonio</div>
+    <div class="address">San Antonio, TX</div>
+    <div class="tag">SAN ANTONIO</div>
+  </div>
+  <div class="dist-item" onclick="focusMarker(17)">
+    <div class="company">Elite Steel &amp; Supply</div>
+    <div class="address">Serves Austin, San Antonio, Waco</div>
+    <div class="tag">SAN ANTONIO</div>
+  </div>
+
+  <h3>Houston</h3>
+  <div class="dist-item" onclick="focusMarker(18)">
+    <div class="company">SRS Building Products — Houston</div>
+    <div class="address">16409 Bratton Lane, Houston TX</div>
+    <div class="tag">HOUSTON</div>
+  </div>
+  <div class="dist-item" onclick="focusMarker(19)">
+    <div class="company">L&amp;W Supply — Houston (Hansen Rd)</div>
+    <div class="address">7901 Hansen Rd, Houston TX 77061</div>
+    <div class="phone">(713) 462-0100</div>
+    <div class="tag">HOUSTON</div>
+  </div>
+  <div class="dist-item" onclick="focusMarker(20)">
+    <div class="company">L&amp;W Supply — Houston (Rankin Rd)</div>
+    <div class="address">1012 Rankin Rd, Houston TX 77092</div>
+    <div class="tag">HOUSTON</div>
+  </div>
+  <div class="dist-item" onclick="focusMarker(21)">
+    <div class="company">RSI Roofers Supply — Houston</div>
+    <div class="address">Houston, TX</div>
+    <div class="tag">HOUSTON</div>
+  </div>
+  <div class="dist-item" onclick="focusMarker(22)">
+    <div class="company">RGE Houston Roofing Supply</div>
+    <div class="address">Houston, TX</div>
+    <div class="tag">HOUSTON</div>
+  </div>
+  <div class="dist-item" onclick="focusMarker(23)">
+    <div class="company">Roofing Supply Inc — Houston</div>
+    <div class="address">Houston, TX</div>
+    <div class="tag">HOUSTON</div>
+  </div>
+  <div class="dist-item" onclick="focusMarker(24)">
+    <div class="company">84 Lumber — Houston</div>
+    <div class="address">22770 Northwest Fwy, Houston TX</div>
+    <div class="tag">HOUSTON</div>
+  </div>
+  <div class="dist-item" onclick="focusMarker(25)">
+    <div class="company">ABC Supply — Houston</div>
+    <div class="address">Houston, TX</div>
+    <div class="tag">HOUSTON</div>
+  </div>
+  <div class="dist-item" onclick="focusMarker(26)">
+    <div class="company">Beacon / QXO — Houston</div>
+    <div class="address">Houston, TX</div>
+    <div class="tag">HOUSTON</div>
+  </div>
+
+  <h3>Waco / Central TX</h3>
+  <div class="dist-item" onclick="focusMarker(27)">
+    <div class="company">Gross Yowell — Waco</div>
+    <div class="address">2201 Franklin Ave, Waco TX 76701</div>
+    <div class="tag">WACO</div>
+  </div>
+  <div class="dist-item" onclick="focusMarker(28)">
+    <div class="company">L&amp;W Supply — Waco</div>
+    <div class="address">715 Jewell Dr, Waco TX</div>
+    <div class="tag">WACO</div>
+  </div>
+  <div class="dist-item" onclick="focusMarker(29)">
+    <div class="company">Cowtown Materials — Waco</div>
+    <div class="address">Waco, TX — serves Temple, Killeen, Bryan</div>
+    <div class="tag">WACO</div>
+  </div>
+  <div class="dist-item" onclick="focusMarker(30)">
+    <div class="company">SRS Building Products — Waco</div>
+    <div class="address">Waco, TX</div>
+    <div class="tag">WACO</div>
+  </div>
+  <div class="dist-item" onclick="focusMarker(31)">
+    <div class="company">Beacon / QXO — Waco</div>
+    <div class="address">Waco, TX</div>
+    <div class="tag">WACO</div>
+  </div>
+  <div class="dist-item" onclick="focusMarker(32)">
+    <div class="company">ABC Supply — Temple</div>
+    <div class="address">Temple, TX — Austin corridor</div>
+    <div class="tag">WACO</div>
+  </div>
+</div>
+
+<div id="map"></div>
+
+<script>
+const afBlue = '#1a365d';
+const afOrange = '#c05621';
+
+const locations = [
+  // Austin (0-7)
+  {name:"ABC Supply — Austin (St Johns)", addr:"901 E St Johns Ave, Austin TX 78753", phone:"(512) 454-0400", lat:30.3459, lng:-97.7291, region:"AUSTIN", note:"Mgr: Jason Bludau"},
+  {name:"ABC Supply — Austin (Bratton)", addr:"15508 Bratton Ln, Austin TX 78728", lat:30.4269, lng:-97.6749, region:"AUSTIN"},
+  {name:"ABC Supply — Austin (Winnebago)", addr:"4905 Winnebago Ln, Austin TX 78744", lat:30.2197, lng:-97.7838, region:"AUSTIN"},
+  {name:"L&W Supply — Austin", addr:"503 Industrial Blvd, Austin TX 78745", phone:"(512) 444-1804", lat:30.2079, lng:-97.7644, region:"AUSTIN"},
+  {name:"Roofing Supply Group — Austin", addr:"8319 N Lamar Blvd, Austin TX 78753", lat:30.3677, lng:-97.7157, region:"AUSTIN"},
+  {name:"Budget Roofing Supply — Austin", addr:"Austin, TX", lat:30.2672, lng:-97.7431, region:"AUSTIN"},
+  {name:"SRS Building Products — Austin", addr:"Austin, TX", lat:30.2672, lng:-97.7431, region:"AUSTIN"},
+  {name:"Beacon / QXO — Austin", addr:"Austin, TX", lat:30.2672, lng:-97.7431, region:"AUSTIN"},
+  // Bryan (8-11)
+  {name:"QXO / Beacon — Bryan", addr:"4100 E State Hwy 21, Bryan TX 77808", lat:30.6700, lng:-96.3400, region:"BRYAN"},
+  {name:"SRS Building Products — College Station", addr:"College Station, TX", lat:30.6014, lng:-96.3344, region:"BRYAN"},
+  {name:"Builders FirstSource — College Station", addr:"College Station, TX", lat:30.6014, lng:-96.3344, region:"BRYAN"},
+  {name:"McCoy's Building Supply — Bryan", addr:"Bryan, TX", lat:30.6743, lng:-96.3749, region:"BRYAN"},
+  // San Antonio (12-17)
+  {name:"SRS Building Products — San Antonio", addr:"San Antonio, TX", lat:29.4241, lng:-98.4936, region:"SAN ANTONIO"},
+  {name:"L&W Supply — Schertz (San Antonio)", addr:"7059 Pipestone Rd, Schertz TX 78154", lat:29.5678, lng:-98.2678, region:"SAN ANTONIO"},
+  {name:"84 Lumber — San Antonio (FM 2252)", addr:"18100 Fm 2252, San Antonio TX", lat:29.4500, lng:-98.3500, region:"SAN ANTONIO"},
+  {name:"84 Lumber — San Antonio (Riverside)", addr:"327 Riverside Dr, San Antonio TX", lat:29.4520, lng:-98.4855, region:"SAN ANTONIO"},
+  {name:"Texas Building Supply / US LBM — San Antonio", addr:"San Antonio, TX", lat:29.4241, lng:-98.4936, region:"SAN ANTONIO"},
+  {name:"Elite Steel & Supply", addr:"Serves Austin, San Antonio, Waco", lat:30.0000, lng:-98.0000, region:"SAN ANTONIO"},
+  // Houston (18-26)
+  {name:"SRS Building Products — Houston", addr:"16409 Bratton Lane, Houston TX", lat:29.9700, lng:-95.4100, region:"HOUSTON"},
+  {name:"L&W Supply — Houston (Hansen Rd)", addr:"7901 Hansen Rd, Houston TX 77061", phone:"(713) 462-0100", lat:29.6611, lng:-95.3889, region:"HOUSTON"},
+  {name:"L&W Supply — Houston (Rankin Rd)", addr:"1012 Rankin Rd, Houston TX 77092", lat:29.8575, lng:-95.4479, region:"HOUSTON"},
+  {name:"RSI Roofers Supply — Houston", addr:"Houston, TX", lat:29.7608, lng:-95.3698, region:"HOUSTON"},
+  {name:"RGE Houston Roofing Supply", addr:"Houston, TX", lat:29.7608, lng:-95.3698, region:"HOUSTON"},
+  {name:"Roofing Supply Inc — Houston", addr:"Houston, TX", lat:29.7608, lng:-95.3698, region:"HOUSTON"},
+  {name:"84 Lumber — Houston", addr:"22770 Northwest Fwy, Houston TX", lat:29.9200, lng:-95.5900, region:"HOUSTON"},
+  {name:"ABC Supply — Houston", addr:"Houston, TX", lat:29.7608, lng:-95.3698, region:"HOUSTON"},
+  {name:"Beacon / QXO — Houston", addr:"Houston, TX", lat:29.7608, lng:-95.3698, region:"HOUSTON"},
+  // Waco (27-32)
+  {name:"Gross Yowell — Waco", addr:"2201 Franklin Ave, Waco TX 76701", lat:31.5493, lng:-97.0999, region:"WACO"},
+  {name:"L&W Supply — Waco", addr:"715 Jewell Dr, Waco TX", lat:31.5600, lng:-97.1100, region:"WACO"},
+  {name:"Cowtown Materials — Waco", addr:"Waco, TX — serves Temple, Killeen, Bryan", lat:31.5493, lng:-97.1331, region:"WACO"},
+  {name:"SRS Building Products — Waco", addr:"Waco, TX", lat:31.5493, lng:-97.1331, region:"WACO"},
+  {name:"Beacon / QXO — Waco", addr:"Waco, TX", lat:31.5493, lng:-97.1331, region:"WACO"},
+  {name:"ABC Supply — Temple", addr:"Temple, TX — Austin corridor", lat:31.0982, lng:-97.3428, region:"WACO"},
+];
+
+const regionColors = {
+  "AUSTIN": afBlue,
+  "BRYAN": afOrange,
+  "SAN ANTONIO": "#276749",
+  "HOUSTON": "#744210",
+  "WACO": "#553C9A",
+};
+
+const map = L.map('map').setView([30.0, -96.5], 7);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+  maxZoom: 18,
+}).addTo(map);
+
+const markers = [];
+locations.forEach((loc, i) => {
+  const color = regionColors[loc.region] || afBlue;
+  const icon = L.divIcon({
+    html: `<div style="background:${color};width:14px;height:14px;border-radius:50%;border:2px solid white;box-shadow:0 0 4px rgba(0,0,0,0.3)"></div>`,
+    className: '',
+    iconSize: [14, 14],
+    iconAnchor: [7, 7],
+    popupAnchor: [0, -10],
+  });
+
+  const phoneHtml = loc.phone ? `<p><b>Phone:</b> ${loc.phone}</p>` : '';
+  const noteHtml = loc.note ? `<p><b>Note:</b> ${loc.note}</p>` : '';
+  const popup = `<div class="popup-body"><h4>${loc.name}</h4><p>${loc.addr}</p>${phoneHtml}${noteHtml}<span class="tag">${loc.region}</span></div>`;
+
+  const m = L.marker([loc.lat, loc.lng], {icon}).bindPopup(popup);
+  m.addTo(map);
+  markers.push(m);
+});
+
+function focusMarker(i) {
+  map.setView([locations[i].lat, locations[i].lng], 13);
+  markers[i].openPopup();
+  document.querySelectorAll('.dist-item').forEach(el => el.classList.remove('active'));
+}
+
+function filterList() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const items = document.querySelectorAll('.dist-item');
+  let shown = 0;
+  items.forEach((item, i) => {
+    const text = item.textContent.toLowerCase();
+    const show = text.includes(q);
+    item.style.display = show ? 'block' : 'none';
+    if (show) shown++;
+  });
+  document.getElementById('visibleCount').textContent = shown;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+<Document>
+  <name>American Flashings - Roofing Distributors Texas</name>
+  <description>Roofing supply distributors south of Temple, TX for American Flashings outreach</description>
+  <styleUrl>#cluster</styleUrl>
+
+  <!-- AUSTIN -->
+  <Placemark>
+    <name>ABC Supply - Austin (St Johns)</name>
+    <address>901 E St Johns Ave, Austin, TX 78753</address>
+    <phoneNumber>(512) 454-0400</phoneNumber>
+    <description>ABC Supply - Austin. Mgr: Jason Bludau. americanflashings.com target account.</description>
+    <Point><coordinates>-97.7291,30.3459</coordinates></Point>
+  </Placemark>
+  <Placemark>
+    <name>ABC Supply - Austin (Bratton)</name>
+    <address>15508 Bratton Ln, Austin, TX 78728</address>
+    <description>ABC Supply Austin West location.</description>
+    <Point><coordinates>-97.6749,30.4269</coordinates></Point>
+  </Placemark>
+  <Placemark>
+    <name>ABC Supply - Austin (Winnebago)</name>
+    <address>4905 Winnebago Ln, Austin, TX 78744</address>
+    <description>ABC Supply Austin South location.</description>
+    <Point><coordinates>-97.7838,30.2197</coordinates></Point>
+  </Placemark>
+  <Placemark>
+    <name>L&amp;W Supply - Austin</name>
+    <address>503 Industrial Blvd, Austin, TX 78745</address>
+    <phoneNumber>(512) 444-1804</phoneNumber>
+    <description>L&amp;W Supply Austin. Part of ABC Supply. lwsupply.com</description>
+    <Point><coordinates>-97.7644,30.2079</coordinates></Point>
+  </Placemark>
+  <Placemark>
+    <name>Roofing Supply Group - Austin</name>
+    <address>8319 N Lamar Blvd, Austin, TX 78753</address>
+    <description>Roofing Supply Group - Austin. Wholesale distributor. rsrooferssupply.com</description>
+    <Point><coordinates>-97.7157,30.3677</coordinates></Point>
+  </Placemark>
+  <Placemark>
+    <name>Budget Roofing Supply - Austin</name>
+    <address>Austin, TX</address>
+    <description>Budget Roofing Supply Austin. budgetroofingsupply.com</description>
+    <Point><coordinates>-97.7431,30.2672</coordinates></Point>
+  </Placemark>
+  <Placemark>
+    <name>SRS Building Products - Austin</name>
+    <address>Austin, TX</address>
+    <description>SRS Building Products Austin. srsdistribution.com - fastest growing distributor network.</description>
+    <Point><coordinates>-97.7431,30.2672</coordinates></Point>
+  </Placemark>
+  <Placemark>
+    <name>Beacon Building Products (QXO) - Austin</name>
+    <address>Austin, TX</address>
+    <description>Beacon Building Products / QXO Austin. locations.becn.com</description>
+    <Point><coordinates>-97.7431,30.2672</coordinates></Point>
+  </Placemark>
+
+  <!-- BRYAN / COLLEGE STATION -->
+  <Placemark>
+    <name>QXO / Beacon - Bryan</name>
+    <address>4100 E State Hwy 21, Bryan, TX 77808</address>
+    <description>QXO (fka Beacon Building Products) Bryan. Full service exterior building materials distributor.</description>
+    <Point><coordinates>-96.3400,30.6700</coordinates></Point>
+  </Placemark>
+  <Placemark>
+    <name>SRS Building Products - College Station</name>
+    <address>College Station, TX</address>
+    <description>SRS Building Products College Station. srsdistribution.com</description>
+    <Point><coordinates>-96.3344,30.6014</coordinates></Point>
+  </Placemark>
+  <Placemark>
+    <name>Builders FirstSource - College Station</name>
+    <address>College Station, TX</address>
+    <description>Builders FirstSource College Station. bldr.com - roof trusses, floor systems, wall panels.</description>
+    <Point><coordinates>-96.3344,30.6014</coordinates></Point>
+  </Placemark>
+  <Placemark>
+    <name>McCoy's Building Supply - Bryan</name>
+    <address>Bryan, TX</address>
+    <description>McCoy's Building Supply Bryan. Full-service lumberyard. mccoys.com</description>
+    <Point><coordinates>-96.3749,30.6743</coordinates></Point>
+  </Placemark>
+
+  <!-- SAN ANTONIO -->
+  <Placemark>
+    <name>SRS Building Products - San Antonio</name>
+    <address>San Antonio, TX</address>
+    <description>SRS Building Products San Antonio. srsdistribution.com</description>
+    <Point><coordinates>-98.4936,29.4241</coordinates></Point>
+  </Placemark>
+  <Placemark>
+    <name>L&amp;W Supply - Schertz (San Antonio)</name>
+    <address>7059 Pipestone Rd, Schertz, TX 78154</address>
+    <description>L&amp;W Supply Schertz (San Antonio area). lwsupply.com</description>
+    <Point><coordinates>-98.2678,29.5678</coordinates></Point>
+  </Placemark>
+  <Placemark>
+    <name>84 Lumber - San Antonio (FM 2252)</name>
+    <address>18100 Fm 2252, San Antonio, TX</address>
+    <description>84 Lumber San Antonio East. 84lumber.com</description>
+    <Point><coordinates>-98.3500,29.4500</coordinates></Point>
+  </Placemark>
+  <Placemark>
+    <name>84 Lumber - San Antonio (Riverside)</name>
+    <address>327 Riverside Dr, San Antonio, TX</address>
+    <description>84 Lumber San Antonio. 84lumber.com</description>
+    <Point><coordinates>-98.4855,29.4520</coordinates></Point>
+  </Placemark>
+  <Placemark>
+    <name>84 Lumber - Austin area (near San Antonio)</name>
+    <address>Near Austin, TX (serves San Antonio corridor)</address>
+    <description>84 Lumber new store near Austin - serves San Antonio/I-10 corridor. 84lumber.com</description>
+    <Point><coordinates>-98.2000,29.5000</coordinates></Point>
+  </Placemark>
+  <Placemark>
+    <name>Texas Building Supply - San Antonio</name>
+    <address>San Antonio, TX</address>
+    <description>Texas Building Supply (US LBM) - JP Hart, Arrowhead Stairs. texasbuildingsupply.com</description>
+    <Point><coordinates>-98.4936,29.4241</coordinates></Point>
+  </Placemark>
+  <Placemark>
+    <name>Elite Steel &amp; Supply - Texas</name>
+    <address>Serves Austin, San Antonio, Waco</address>
+    <description>Elite Steel &amp; Supply - metal roofing, Waco/Austin/San Antonio. elitesteelandsupply.com</description>
+    <Point><coordinates>-97.1331,31.5493</coordinates></Point>
+  </Placemark>
+
+  <!-- HOUSTON -->
+  <Placemark>
+    <name>SRS Building Products - Houston (Bratton)</name>
+    <address>16409 Bratton Lane, Houston, TX 78728</address>
+    <description>SRS Building Products Houston. srsdistribution.com</description>
+    <Point><coordinates>-95.4100,29.9700</coordinates></Point>
+  </Placemark>
+  <Placemark>
+    <name>L&amp;W Supply - Houston (Hansen Rd)</name>
+    <address>7901 Hansen Rd, Houston, TX 77061</address>
+    <phoneNumber>(713) 462-0100</phoneNumber>
+    <description>L&amp;W Supply Houston (Hansen Rd). lwsupply.com</description>
+    <Point><coordinates>-95.3889,29.6611</coordinates></Point>
+  </Placemark>
+  <Placemark>
+    <name>L&amp;W Supply - Houston (Rankin Rd)</name>
+    <address>1012 Rankin Rd, Houston, TX 77092</address>
+    <description>L&amp;W Supply Houston (Rankin Rd). lwsupply.com</description>
+    <Point><coordinates>-95.4479,29.8575</coordinates></Point>
+  </Placemark>
+  <Placemark>
+    <name>RSI Roofers Supply - Houston</name>
+    <address>Houston, TX</address>
+    <description>RSI Roofers Supply - Independent distributor, Houston, College Station, Galveston. rsirooferssupply.com</description>
+    <Point><coordinates>-95.3698,29.7608</coordinates></Point>
+  </Placemark>
+  <Placemark>
+    <name>RGE Houston Roofing Supply</name>
+    <address>Houston, TX</address>
+    <description>RGE Houston Roofing Supply - Family owned 17+ years. rgehoustonroofingsupply.com</description>
+    <Point><coordinates>-95.3698,29.7608</coordinates></Point>
+  </Placemark>
+  <Placemark>
+    <name>Roofing Supply Inc - Houston</name>
+    <address>Houston, TX</address>
+    <description>Roofing Supply Inc - Locally owned independent distributor. facebook.com/RoofingSupplyInc</description>
+    <Point><coordinates>-95.3698,29.7608</coordinates></Point>
+  </Placemark>
+  <Placemark>
+    <name>84 Lumber - Houston</name>
+    <address>22770 Northwest Fwy, Houston, TX</address>
+    <description>84 Lumber Houston. 84lumber.com</description>
+    <Point><coordinates>-95.5900,29.9200</coordinates></Point>
+  </Placemark>
+  <Placemark>
+    <name>ABC Supply - Houston</name>
+    <address>Houston, TX</address>
+    <description>ABC Supply Houston - Multiple locations. abcsupply.com</description>
+    <Point><coordinates>-95.3698,29.7608</coordinates></Point>
+  </Placemark>
+  <Placemark>
+    <name>Beacon Building Products (QXO) - Houston</name>
+    <address>Houston, TX</address>
+    <description>Beacon Building Products / QXO Houston. locations.becn.com</description>
+    <Point><coordinates>-95.3698,29.7608</coordinates></Point>
+  </Placemark>
+
+  <!-- WACO / CENTRAL TEXAS -->
+  <Placemark>
+    <name>Gross Yowell - Waco</name>
+    <address>2201 Franklin Ave, Waco, TX 76701</address>
+    <description>Gross Yowell Lumber - Waco's premier building materials.grossyowell.com - doors, windows, millwork, roofing.</description>
+    <Point><coordinates>-97.0999,31.5493</coordinates></Point>
+  </Placemark>
+  <Placemark>
+    <name>L&amp;W Supply - Waco</name>
+    <address>715 Jewell Dr, Waco, TX</address>
+    <description>L&amp;W Supply Waco. lwsupply.com</description>
+    <Point><coordinates>-97.1100,31.5600</coordinates></Point>
+  </Placemark>
+  <Placemark>
+    <name>Cowtown Materials - Waco</name>
+    <address>Waco, TX</address>
+    <description>Cowtown Materials - Serves Waco, Temple, Killeen, Corsicana, Bryan. cowtownmaterials.com</description>
+    <Point><coordinates>-97.1331,31.5493</coordinates></Point>
+  </Placemark>
+  <Placemark>
+    <name>SRS Building Products - Waco</name>
+    <address>Waco, TX</address>
+    <description>SRS Building Products Waco. srsdistribution.com</description>
+    <Point><coordinates>-97.1331,31.5493</coordinates></Point>
+  </Placemark>
+  <Placemark>
+    <name>Beacon Building Products (QXO) - Waco</name>
+    <address>Waco, TX</address>
+    <description>Beacon Building Products / QXO Waco area. locations.becn.com</description>
+    <Point><coordinates>-97.1331,31.5493</coordinates></Point>
+  </Placemark>
+  <Placemark>
+    <name>ABC Supply - Temple</name>
+    <address>Temple, TX</address>
+    <description>ABC Supply Temple - Serves south Austin corridor. abcsupply.com</description>
+    <Point><coordinates>-97.3428,31.0982</coordinates></Point>
+  </Placemark>
+
+</Document>
+</kml>

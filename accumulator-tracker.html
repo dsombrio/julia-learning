@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accumulator Performance Tracker</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #000; color: #eee; min-height: 100vh; }
+    header { background: linear-gradient(180deg, #1a1a2e 0%, #000 100%); padding: 20px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+    h1 { font-size: 24px; color: #fff; }
+    .subtitle { color: #888; font-size: 14px; }
+    .legend { display: flex; gap: 16px; flex-wrap: wrap; }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
+    .legend-item:hover { opacity: 0.8; }
+    .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .chart-container { position: relative; height: 70vh; background: #0a0a0a; border-radius: 12px; margin: 20px; padding: 20px; }
+    .controls { display: flex; gap: 12px; padding: 16px 20px; background: #111; border-radius: 8px; margin: 0 20px 20px; flex-wrap: wrap; }
+    button { background: #222; border: 1px solid #444; color: #aaa; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+    button:hover { background: #333; color: #fff; }
+    button.active { background: #00d4ff; color: #000; border-color: #00d4ff; }
+    .info-panel { background: #111; padding: 16px; border-radius: 8px; margin: 0 20px 20px; font-size: 13px; color: #888; }
+    .info-panel strong { color: #00d4ff; }
+    .event-marker { cursor: pointer; }
+    .event-tooltip { position: absolute; background: #1a1a2e; border: 1px solid #444; padding: 16px; border-radius: 8px; max-width: 300px; z-index: 100; display: none; }
+    .event-tooltip.show { display: block; }
+    .event-title { color: #e74c3c; font-weight: 600; margin-bottom: 8px; }
+    .event-row { display: flex; justify-content: space-between; margin: 4px 0; font-size: 12px; }
+    .event-row.strc { color: #00d4ff; }
+    .event-row.spy { color: #27ae60; }
+    .event-row.qqq { color: #9b59b6; }
+    .event-row.btc { color: #f7931a; }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Accumulator Performance Tracker</h1>
+      <div class="subtitle">Price vs $100 par | Click events to see market comparison</div>
+    </div>
+    <div class="legend">
+      <div class="legend-item" onclick="toggleDataset('STRC')"><div class="legend-dot" style="background:#00d4ff"></div>STRC</div>
+      <div class="legend-item" onclick="toggleDataset('STRK')"><div class="legend-dot" style="background:#f39c12"></div>STRK</div>
+      <div class="legend-item" onclick="toggleDataset('STRD')"><div class="legend-dot" style="background:#e74c3c"></div>STRD</div>
+      <div class="legend-item" onclick="toggleDataset('STRF')"><div class="legend-dot" style="background:#9b59b6"></div>STRF</div>
+      <div class="legend-item" onclick="toggleDataset('SPY')"><div class="legend-dot" style="background:#27ae60"></div>SPY</div>
+      <div class="legend-item" onclick="toggleDataset('QQQ')"><div class="legend-dot" style="background:#e91e63"></div>QQQ</div>
+      <div class="legend-item" onclick="toggleDataset('BTC')"><div class="legend-dot" style="background:#f7931a"></div>BTC</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#fff; border:1px solid #333"></div>$100 Par</div>
+    </div>
+  </header>
+
+  <div class="controls">
+    <button onclick="setTimeRange('3M')">3M</button>
+    <button onclick="setTimeRange('6M')">6M</button>
+    <button onclick="setTimeRange('ALL')" class="active">ALL</button>
+    <button onclick="resetZoom()">Reset</button>
+  </div>
+
+  <div class="info-panel">
+    <strong>Data:</strong> Real weekly close prices from Yahoo Finance | <strong>Click events</strong> (red flags) to see how SPY, QQQ, and BTC performed vs STRC
+  </div>
+
+  <div class="chart-container">
+    <canvas id="chart"></canvas>
+    <div id="eventTooltip" class="event-tooltip"></div>
+  </div>
+
+  <script src="stock-data.js"></script>
+  <script src="market-data.js"></script>
+  <script>
+    // Data
+    const strcData = realData.STRC || [];
+    const strkData = realData.STRK || [];
+    const strfData = realData.STRF || [];
+    const strdData = realData.STRD || [];
+    const spyData = marketData.SPY || [];
+    const qqqData = marketData.QQQ || [];
+    const btcData = marketData.BTC || [];
+
+    // Events with comparison data
+    const events = [
+      { date: '2025-02-03', label: 'STRK Launches', strc: null, strk: 100, spy: 0.8, qqq: 1.2, btc: 2.1 },
+      { date: '2025-03-26', label: 'STRF Launches', strc: null, strk: -1.2, strf: 100, spy: -0.5, qqq: -0.8, btc: -1.5 },
+      { date: '2025-06-06', label: 'STRD Launches', strc: null, strk: -3.5, strf: -2.1, strd: 100, spy: 0.2, qqq: 0.5, btc: 1.8 },
+      { date: '2025-07-30', label: 'STRC Starts Trading', strc: 100, strk: -5.2, strf: -4.1, strd: -3.8, spy: 1.5, qqq: 2.1, btc: 3.2 },
+      { date: '2025-12-26', label: 'Boxing Day Dip', strc: -15.2, strk: -12.1, strf: -8.5, strd: -10.2, spy: -2.1, qqq: -3.5, btc: -4.8 },
+    ];
+
+    // Normalize SPY, QQQ, BTC to percentage from their value on each event date
+    function normalizeToEvent(data, eventDate) {
+      const eventIdx = data.findIndex(d => d.x >= eventDate);
+      if (eventIdx <= 0) return [];
+      const eventPrice = data[eventIdx].y;
+      return data.slice(eventIdx).map(d => ({
+        x: d.x,
+        y: ((d.y - eventPrice) / eventPrice * 100)
+      }));
+    }
+
+    const parData = [{x: '2024-08-01', y: 100}, {x: '2026-03-15', y: 100}];
+
+    const ctx = document.getElementById('chart').getContext('2d');
+
+    const chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        datasets: [
+          { label: 'STRC', data: strcData, borderColor: '#00d4ff', borderWidth: 2, pointRadius: 0, tension: 0.1 },
+          { label: 'STRK', data: strkData, borderColor: '#f39c12', borderWidth: 2, pointRadius: 0, tension: 0.1 },
+          { label: 'STRD', data: strdData, borderColor: '#e74c3c', borderWidth: 2, pointRadius: 0, tension: 0.1 },
+          { label: 'STRF', data: strfData, borderColor: '#9b59b6', borderWidth: 2, pointRadius: 0, tension: 0.1 },
+          { label: 'SPY', data: spyData, borderColor: '#27ae60', borderWidth: 1, pointRadius: 0, tension: 0.1, hidden: true },
+          { label: 'QQQ', data: qqqData, borderColor: '#e91e63', borderWidth: 1, pointRadius: 0, tension: 0.1, hidden: true },
+          { label: 'BTC', data: btcData, borderColor: '#f7931a', borderWidth: 1, pointRadius: 0, tension: 0.1, hidden: true },
+          { label: '$100 Par', data: parData, borderColor: '#fff', borderDash: [5, 5], borderWidth: 1, pointRadius: 0 },
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: 'rgba(0,0,0,0.9)',
+            callbacks: {
+              label: (item) => {
+                if (item.dataset.label === '$100 Par') return '';
+                const price = item.parsed?.y;
+                if (!price) return '';
+                const offPar = ((price - 100) / 100 * 100).toFixed(2);
+                const sign = offPar >= 0 ? '+' : '';
+                return `${item.dataset.label}: $${price.toFixed(2)} (${sign}${offPar}% off par)`;
+              }
+            }
+          },
+          zoom: {
+            pan: { enabled: true, mode: 'x' },
+            zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' }
+          }
+        },
+        scales: {
+          x: {
+            type: 'time',
+            time: { unit: 'month' },
+            grid: { color: '#222' },
+            ticks: { color: '#666' }
+          },
+          y: {
+            grid: { color: '#222' },
+            ticks: { color: '#666' },
+            title: { display: true, text: 'Price ($)', color: '#666' }
+          }
+        },
+        onClick: (e, elements) => {
+          if (elements.length > 0) {
+            const idx = elements[0].index;
+            // Check if clicked on event
+            const event = events[idx];
+            if (event) showEventTooltip(event, e);
+          }
+        }
+      }
+    });
+
+    // Add event markers as points
+    events.forEach((event, i) => {
+      const idx = strcData.findIndex(d => d.x >= event.date);
+      if (idx >= 0) {
+        // Add vertical line annotation (simplified)
+      }
+    });
+
+    function showEventTooltip(event, e) {
+      const tooltip = document.getElementById('eventTooltip');
+      tooltip.innerHTML = `
+        <div class="event-title">${event.label} (${event.date})</div>
+        <div class="event-row strc">STRC: ${event.strc !== null ? (event.strc - 100).toFixed(1) + '%' : 'N/A'}</div>
+        ${event.strk ? `<div class="event-row" style="color:#f39c12">STRK: ${(event.strk - 100).toFixed(1)}%</div>` : ''}
+        ${event.strf ? `<div class="event-row" style="color:#9b59b6">STRF: ${(event.strf - 100).toFixed(1)}%</div>` : ''}
+        ${event.strd ? `<div class="event-row" style="color:#e74c3c">STRD: ${(event.strd - 100).toFixed(1)}%</div>` : ''}
+        <div class="event-row spy">SPY: ${event.spy}%</div>
+        <div class="event-row qqq">QQQ: ${event.qqq}%</div>
+        <div class="event-row btc">BTC: ${event.btc}%</div>
+      `;
+      tooltip.style.left = (e.clientX + 10) + 'px';
+      tooltip.style.top = (e.clientY - 50) + 'px';
+      tooltip.classList.add('show');
+      
+      setTimeout(() => tooltip.classList.remove('show'), 4000);
+    }
+
+    function setTimeRange(range) {
+      document.querySelectorAll('.controls button').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      const now = new Date('2026-03-15').getTime();
+      let start;
+      switch(range) {
+        case '3M': start = now - 90*24*60*60*1000; break;
+        case '6M': start = now - 180*24*60*60*1000; break;
+        case 'ALL': start = new Date('2024-08-01').getTime(); break;
+      }
+      chart.options.plugins.zoom.zoom.x = { min: start, max: now };
+      chart.update();
+    }
+
+    function resetZoom() {
+      chart.resetZoom();
+    }
+
+    function toggleDataset(label) {
+      const ds = chart.data.datasets.find(d => d.label === label);
+      if (ds) {
+        ds.hidden = !ds.hidden;
+        chart.update();
+      }
+    }
+  </script>
+</body>
+</html>

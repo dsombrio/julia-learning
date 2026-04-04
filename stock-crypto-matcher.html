@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Match a stock's beta to Bitcoin, S&P 500, or NASDAQ. Calculate optimal portfolio allocation across BTC, MSTR, and other crypto assets.">
+    <meta name="keywords" content="beta, portfolio, bitcoin, crypto, stocks, allocation, MSTR, S&P 500, NASDAQ, investing">
+    <meta name="author" content="StrategyPreferreds">
+    <meta name="theme-color" content="#000000">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="StrategyPreferreds - Beta Portfolio Matcher">
+    <meta property="og:description" content="Match a stock's beta to Bitcoin, S&P 500, or NASDAQ">
+    <meta property="og:type" content="website">
+    
+    <!-- Security Headers (for production deployment) -->
+    <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://finnhub.io https://api.coingecko.com;"> -->
+    
+    <title>StrategyPreferreds - Beta Portfolio Matcher</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'SF Pro Display', 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #000000;
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .logo {
+            text-align: left;
+            margin-bottom: 8px;
+            padding-left: 0;
+        }
+        
+        .logo-text {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #f7931a;
+            letter-spacing: -0.03em;
+            text-transform: uppercase;
+        }
+        
+        .logo-accent {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #f7931a;
+            border-radius: 50%;
+            margin-left: 2px;
+            vertical-align: super;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #333;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            color: #888;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            position: relative;
+            z-index: 11;
+        }
+        
+        .tab:hover {
+            color: #fff;
+        }
+        
+        .tab.active {
+            color: #f7931a;
+            border-bottom-color: #f7931a;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .subtitle {
+            text-align: left;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding-left: 0;
+        }
+        
+        .input-section {
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 0;
+            max-width: 520px;
+            margin: 0;
+        }
+        
+        input {
+            flex: 1;
+            padding: 14px 18px;
+            font-size: 1rem;
+            font-weight: 500;
+            background: #000;
+            border: 1px solid #333;
+            border-right: none;
+            border-radius: 4px 0 0 4px;
+            color: #fff;
+            text-transform: uppercase;
+            outline: none;
+            transition: all 0.2s;
+        }
+        
+        input:focus {
+            background: #111;
+            border-color: #f7931a;
+        }
+        
+        input::placeholder {
+            color: #555;
+            text-transform: none;
+        }
+        
+        button {
+            padding: 14px 28px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            background: #f7931a;
+            border: none;
+            border-radius: 0 4px 4px 0;
+            color: #000;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        button:hover {
+            background: #ffaa33;
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .error {
+            text-align: center;
+            color: #f85149;
+            margin-top: 16px;
+            padding: 12px;
+            background: rgba(248, 81, 73, 0.1);
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .results {
+            display: none;
+        }
+        
+        .results.active {
+            display: block;
+        }
+        
+        .stock-info {
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .stock-info h2 {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            color: #fff;
+            font-weight: 600;
+        }
+        
+        .stock-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1px;
+            background: #333;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .stat {
+            background: #111;
+            padding: 16px 12px;
+            text-align: center;
+        }
+        
+        .stat-label {
+            font-size: 0.7rem;
+            color: #666;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 500;
+        }
+        
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #fff;
+        }
+        
+        .stat-value.positive { color: #3fb950; }
+        .stat-value.negative { color: #f85149; }
+        
+        .allocation {
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 24px;
+        }
+        
+        .allocation h3 {
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+        
+        .donut-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 0 auto 40px;
+        }
+        
+        .donut-svg {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .donut-segment {
+            fill: none;
+            stroke-width: 50;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .donut-segment:hover {
+            stroke-width: 55;
+            filter: brightness(1.2);
+        }
+        
+        .donut-label {
+            position: absolute;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transform: translate(-50%, -50%);
+            white-space: nowrap;
+            opacity: 1;
+            transition: opacity 0.2s ease;
+            pointer-events: none;
+        }
+        
+        .donut-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 1;
+            background: #000;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .donut-metric {
+            margin: 4px 0;
+        }
+        
+        .donut-metric-label {
+            font-size: 0.6rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .donut-metric-value {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        
+        .allocation-table {
+            width: 100%;
+        }
+        
+        .allocation-row {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #333;
+        }
+        
+        .allocation-row:last-child {
+            border-bottom: none;
+        }
+        
+        .allocation-ticker {
+            width: 80px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #fff;
+        }
+        
+        .allocation-bar-mini {
+            flex: 1;
+            height: 24px;
+            background: #222;
+            border-radius: 2px;
+            margin: 0 16px;
+            overflow: hidden;
+        }
+        
+        .allocation-bar-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+        
+        .allocation-percent {
+            width: 60px;
+            text-align: right;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #fff;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: #666;
+            display: none;
+        }
+        
+        .loading.active {
+            display: block;
+        }
+        
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 2px solid #333;
+            border-top-color: #f7931a;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .disclaimer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #444;
+            font-size: 0.75rem;
+            line-height: 1.6;
+            border-top: 1px solid #222;
+        }
+        
+        .how-to-make-money {
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 24px;
+            margin-top: 24px;
+        }
+        
+        .how-to-make-money h3 {
+            color: #f7931a;
+            font-size: 1.1rem;
+            margin-bottom: 16px;
+        }
+        
+        .how-to-make-money ul {
+            color: #aaa;
+            margin-left: 20px;
+            line-height: 1.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <span class="logo-text">StrategyPreferreds</span>
+        </div>
+        
+        <nav class="tabs" role="tablist" aria-label="Beta calculation options">
+            <button class="tab active" data-tab="crypto" role="tab" aria-selected="true" aria-controls="tab-crypto">Bitcoin</button>
+            <button class="tab" data-tab="sp500" role="tab" aria-selected="false" aria-controls="tab-sp500">S&P 500</button>
+            <button class="tab" data-tab="nasdaq" role="tab" aria-selected="false" aria-controls="tab-nasdaq">NASDAQ</button>
+        </nav>
+        
+        <div class="loading" id="loading" role="status" aria-live="polite">
+            <div class="spinner"></div>
+            <p>Analyzing market data...</p>
+        </div>
+        
+        <!-- Tab Contents -->
+        <div id="tab-crypto" class="tab-content active" role="tabpanel" aria-labelledby="tab-crypto">
+            <p class="subtitle" style="margin-bottom: 20px;">Compare a stock's beta to Bitcoin</p>
+            <div class="input-section">
+                <form class="input-group" onsubmit="event.preventDefault(); calculate('crypto');">
+                    <input type="text" id="symbol-crypto" placeholder="Enter stock symbol (e.g., XOM)" maxlength="10" aria-label="Stock symbol">
+                    <button type="submit">Calculate</button>
+                </form>
+                <div class="error" id="error-crypto" role="alert" aria-live="assertive"></div>
+            </div>
+        </div>
+        
+        <div id="tab-sp500" class="tab-content" role="tabpanel" aria-labelledby="tab-sp500" hidden>
+            <p class="subtitle" style="margin-bottom: 20px;">Compare a stock's beta to S&P 500 (SPY)</p>
+            <div class="input-section">
+                <form class="input-group" onsubmit="event.preventDefault(); calculate('sp500');">
+                    <input type="text" id="symbol-sp500" placeholder="Enter stock symbol (e.g., AAPL)" maxlength="10" aria-label="Stock symbol">
+                    <button type="submit">Calculate</button>
+                </form>
+                <div class="error" id="error-sp500" role="alert" aria-live="assertive"></div>
+            </div>
+        </div>
+        
+        <div id="tab-nasdaq" class="tab-content" role="tabpanel" aria-labelledby="tab-nasdaq" hidden>
+            <p class="subtitle" style="margin-bottom: 20px;">Compare a stock's beta to NASDAQ (QQQ)</p>
+            <div class="input-section">
+                <form class="input-group" onsubmit="event.preventDefault(); calculate('nasdaq');">
+                    <input type="text" id="symbol-nasdaq" placeholder="Enter stock symbol (e.g., MSFT)" maxlength="10" aria-label="Stock symbol">
+                    <button type="submit">Calculate</button>
+                </form>
+                <div class="error" id="error-nasdaq" role="alert" aria-live="assertive"></div>
+            </div>
+        </div>
+        
+        <div class="results" id="results">
+            <div class="stock-info">
+                <h2 id="stock-name">AAPL</h2>
+                <div class="stock-stats">
+                    <div class="stat">
+                        <div class="stat-label">30D Return</div>
+                        <div class="stat-value" id="stock-return">--</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">Volatility (30D)</div>
+                        <div class="stat-value" id="stock-volatility">--</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">Benchmark</div>
+                        <div class="stat-value" id="stock-correlation">--</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">Effective Beta</div>
+                        <div class="stat-value" id="stock-beta">--</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="allocation">
+                <h3>Optimal Allocation</h3>
+                <div class="allocation-bar" id="allocation-bar"></div>
+                <div class="allocation-table" id="allocation-table"></div>
+            </div>
+        </div>
+        
+        <div class="disclaimer">
+            This tool is for educational purposes only. Not financial advice. 
+            Past performance doesn't guarantee future results. strategypreferreds.com is independent of strategy.com and is not affiliated with MicroStrategy or any other company mentioned.
+        </div>
+    </div>
+
+    <script>
+        const CRYPTO_TICKERS = ['BTC', 'MSTR', 'STRC', 'STRD', 'STRK', 'STRF'];
+        const FINNHUB_KEY = 'd6f31jhr01qvn4o1lap0d6f31jhr01qvn4o1lapg';
+        
+        // CoinGecko ID mapping - only for actual crypto
+        const COINGECKO_IDS = {
+            'BTC': 'bitcoin'
+        };
+        
+        // Stock tickers that should come from Finnhub
+        const STOCK_TICKERS = ['MSTR', 'STRC', 'STRD', 'STRK', 'STRF'];
+        
+        // Known beta values for portfolio assets (will use these if API fails)
+        const KNOWN_BETAS = {
+            'BTC': 1.0,      // Bitcoin baseline
+            'MSTR': 3.63,    // From Yahoo Finance
+            'STRC': 3.63,    // High volatility crypto-adjacent
+            'STRD': 3.63,    // High volatility
+            'STRK': 3.63,    // High volatility
+            'STRF': 3.63     // High volatility
+        };
+        
+        // Known dividend yields (annual) - from Yahoo Finance (March 2026)
+        const KNOWN_YIELDS = {
+            'BTC': 0.0,      // No dividend
+            'MSTR': 0.0,     // No dividend
+            'STRC': 0.1152,  // 11.52% annual
+            'STRD': 0.1319,  // 13.19% annual
+            'STRK': 0.1024,  // 10.24% annual
+            'STRF': 0.0998   // 9.98% annual
+        };
+        
+        // Known volatilities (annualized)
+        const KNOWN_VOLATILITIES = {
+            'BTC': 60.0,     // Bitcoin typical annual vol
+            'MSTR': 120.0,   // Very high volatility
+            'STRC': 80.0,    // Estimated
+            'STRD': 80.0,    // Estimated
+            'STRK': 80.0,    // Estimated
+            'STRF': 80.0     // Estimated
+        };
+        
+        // Known returns (30d) for portfolio assets - from Yahoo Finance (March 2026)
+        const KNOWN_RETURNS = {
+            'BTC': 9.30,     // 30-day return
+            'MSTR': 12.77,   // 30-day return
+            'STRC': 3.39,    // 30-day return
+            'STRD': 8.39,    // 30-day return
+            'STRK': -1.75,   // 30-day return
+            'STRF': 5.09     // 30-day return
+        };
+
+        let cryptoPrices = {};
+        let stockPrices = {};
+        let cryptoHistory = {};
+        
+        async function fetchCryptoPrices() {
+            // Fetch BTC from CoinGecko
+            const url = `https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true`;
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.bitcoin) {
+                    cryptoPrices['BTC'] = {
+                        price: data.bitcoin.usd,
+                        change24h: data.bitcoin.usd_24h_change || 0
+                    };
+                }
+            } catch (e) {
+                console.error('Error fetching crypto:', e);
+            }
+            
+            // Fetch stock prices from Finnhub for the portfolio tickers
+            for (const ticker of STOCK_TICKERS) {
+                try {
+                    const quoteUrl = `https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FINNHUB_KEY}`;
+                    const quoteRes = await fetch(quoteUrl);
+                    const quote = await quoteRes.json();
+                    
+                    if (quote && quote.c > 0) {
+                        cryptoPrices[ticker] = {
+                            price: quote.c,
+                            change24h: quote.dp || 0,
+                            isStock: true
+                        };
+                    }
+                } catch (e) {
+                    console.error(`Error fetching ${ticker}:`, e);
+                }
+            }
+        }
+        
+        async function fetchCryptoHistory(ticker) {
+            // Only BTC has reliable history data
+            if (ticker === 'BTC') {
+                const url = `https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=30`;
+                try {
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    return data.prices || [];
+                } catch (e) {
+                    console.error(`Error fetching BTC history:`, e);
+                }
+            }
+            // For stocks, return null (no reliable free API)
+            return null;
+        }
+        
+        async function fetchStockPrice(symbol) {
+            // Using Finnhub API - free tier supports quote only
+            try {
+                // Get quote data
+                const quoteUrl = `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${FINNHUB_KEY}`;
+                const quoteRes = await fetch(quoteUrl);
+                const quote = await quoteRes.json();
+                
+                if (!quote || quote.c === 0) {
+                    return null;
+                }
+                
+                // Get company name
+                const profileUrl = `https://finnhub.io/api/v1/stock/profile2?symbol=${symbol}&token=${FINNHUB_KEY}`;
+                let companyName = symbol;
+                try {
+                    const profileRes = await fetch(profileUrl);
+                    const profile = await profileRes.json();
+                    if (profile && profile.name) {
+                        companyName = profile.name;
+                    }
+                } catch(e) {}
+                
+                // Estimate volatility from daily range (high-low)
+                // This is a proxy for volatility on free tier
+                const dailyRange = quote.h - quote.l;
+                const estimatedVolatility = (dailyRange / quote.c) * 100 * Math.sqrt(252);
+                
+                return {
+                    price: quote.c,
+                    prices: [{ date: new Date(), close: quote.c }],
+                    name: companyName,
+                    dailyChange: quote.d,
+                    dailyChangePercent: quote.dp,
+                    high: quote.h,
+                    low: quote.l,
+                    estimatedVolatility: estimatedVolatility
+                };
+            } catch (e) {
+                console.error(`Error fetching ${symbol}:`, e);
+            }
+            return null;
+        }
+        
+        function calculateReturns(prices) {
+            if (!prices || prices.length < 2) return 0;
+            const first = prices[0].close || prices[0][1];
+            const last = prices[prices.length - 1].close || prices[prices.length - 1][1];
+            return ((last - first) / first) * 100;
+        }
+        
+        function calculateVolatility(prices) {
+            if (!prices || prices.length < 2) return 0;
+            
+            const returns = [];
+            for (let i = 1; i < prices.length; i++) {
+                const prev = prices[i-1].close || prices[i-1][1];
+                const curr = prices[i].close || prices[i][1];
+                returns.push((curr - prev) / prev);
+            }
+            
+            if (returns.length === 0) return 0;
+            
+            const mean = returns.reduce((a, b) => a + b, 0) / returns.length;
+            const variance = returns.reduce((sum, r) => sum + Math.pow(r - mean, 2), 0) / returns.length;
+            return Math.sqrt(variance * 252) * 100; // Annualized volatility
+        }
+        
+        function calculateCorrelation(prices1, prices2) {
+            if (!prices1 || !prices2 || prices1.length < 2 || prices2.length < 2) return 0;
+            
+            // Align prices
+            const minLen = Math.min(prices1.length, prices2.length);
+            const p1 = prices1.slice(-minLen).map(p => p.close || p[1]);
+            const p2 = prices2.slice(-minLen).map(p => p.close || p[1]);
+            
+            // Calculate returns
+            const returns1 = [];
+            const returns2 = [];
+            for (let i = 1; i < minLen; i++) {
+                returns1.push((p1[i] - p1[i-1]) / p1[i-1]);
+                returns2.push((p2[i] - p2[i-1]) / p2[i-1]);
+            }
+            
+            const mean1 = returns1.reduce((a, b) => a + b, 0) / returns1.length;
+            const mean2 = returns2.reduce((a, b) => a + b, 0) / returns2.length;
+            
+            let num = 0, den1 = 0, den2 = 0;
+            for (let i = 0; i < returns1.length; i++) {
+                const d1 = returns1[i] - mean1;
+                const d2 = returns2[i] - mean2;
+                num += d1 * d2;
+                den1 += d1 * d1;
+                den2 += d2 * d2;
+            }
+            
+            if (den1 === 0 || den2 === 0) return 0;
+            return num / Math.sqrt(den1 * den2);
+        }
+        
+        function optimizePortfolio(targetBeta, targetReturn, cryptoData, inputSymbol = '') {
+            // Use known betas for portfolio assets
+            const assets = CRYPTO_TICKERS.map(ticker => ({
+                ticker,
+                beta: KNOWN_BETAS[ticker] || 1.0,
+                return30d: KNOWN_RETURNS[ticker] || 0
+            }));
+            
+            // If input symbol matches a portfolio asset, return 100% of that asset
+            if (inputSymbol && CRYPTO_TICKERS.includes(inputSymbol)) {
+                return [{
+                    ticker: inputSymbol,
+                    weight: 1.0
+                }];
+            }
+            
+            // If target beta is very low (< 0.5), use mostly BTC
+            if (targetBeta < 0.5) {
+                const btcWeight = Math.min(0.95, 0.7 + targetBeta * 0.5);
+                const otherWeight = 1 - btcWeight;
+                const otherAssets = assets.filter(a => a.ticker !== 'BTC');
+                const otherPerAsset = otherWeight / otherAssets.length;
+                
+                return [
+                    { ticker: 'BTC', weight: btcWeight },
+                    ...otherAssets.map(a => ({ ticker: a.ticker, weight: otherPerAsset }))
+                ];
+            }
+            
+            // If target beta is very high (> 3), use high-beta assets
+            if (targetBeta > 3) {
+                const highBeta = ['MSTR', 'STRC', 'STRK', 'STRF'].filter(t => KNOWN_BETAS[t] >= 2.5);
+                const lowBeta = ['BTC', 'STRD'];
+                const highWeight = Math.min(0.9, 0.6 + targetBeta * 0.1);
+                const lowWeight = 1 - highWeight;
+                
+                const highPerAsset = highWeight / highBeta.length;
+                const lowPerAsset = lowWeight / lowBeta.length;
+                
+                return [
+                    ...highBeta.map(t => ({ ticker: t, weight: highPerAsset })),
+                    ...lowBeta.map(t => ({ ticker: t, weight: lowPerAsset }))
+                ];
+            }
+            
+            // For moderate betas (0.5 - 3), calculate weights inversely proportional to beta
+            // Lower beta assets get higher weights
+            let inverseBetaSum = 0;
+            const weightedAssets = assets.map(a => {
+                const invBeta = 1 / a.beta;
+                inverseBetaSum += invBeta;
+                return { ...a, invBeta };
+            });
+            
+            // Calculate weights as inverse beta proportion
+            let weights = weightedAssets.map(a => a.invBeta / inverseBetaSum);
+            
+            // Adjust for target beta - if target is higher than weighted average, increase high-beta weights
+            const weightedAvgBeta = assets.reduce((sum, a, i) => sum + weights[i] * a.beta, 0);
+            const betaDiff = targetBeta - weightedAvgBeta;
+            
+            // Nudge weights based on beta difference
+            weights = weights.map((w, i) => {
+                const assetBeta = assets[i].beta;
+                const nudge = betaDiff * 0.1 * (assetBeta > weightedAvgBeta ? 1 : -1);
+                return Math.max(0.02, Math.min(0.6, w + nudge));
+            });
+            
+            // Renormalize
+            const total = weights.reduce((a, b) => a + b, 0);
+            weights = weights.map(w => w / total);
+            
+            return assets.map((a, i) => ({
+                ticker: a.ticker,
+                weight: weights[i]
+            }));
+        }
+        
+        async function calculate(tabType = 'crypto') {
+            try {
+                const inputId = 'symbol-' + tabType;
+                const errorId = 'error-' + tabType;
+                const symbolEl = document.getElementById(inputId);
+                if (!symbolEl) {
+                    alert('Input element not found: ' + inputId);
+                    return;
+                }
+                const symbol = symbolEl.value.toUpperCase().trim();
+                
+                // Input validation - only allow valid stock symbols
+                if (!symbol || !/^[A-Z]{1,5}$/.test(symbol)) {
+                    document.getElementById(errorId).textContent = 'Please enter a valid stock symbol (1-5 letters)';
+                    document.getElementById(errorId).style.display = 'block';
+                    return;
+                }
+                
+                showLoading(true);
+                document.getElementById(errorId).style.display = 'none';
+                hideResults();
+                
+                // Fetch crypto data for portfolio
+                await fetchCryptoPrices();
+                
+                // Fetch crypto history for all tickers
+                for (const ticker of CRYPTO_TICKERS) {
+                    cryptoHistory[ticker] = await fetchCryptoHistory(ticker);
+                }
+                
+                // Fetch stock data
+                const stockData = await fetchStockPrice(symbol);
+                
+                if (!stockData || !stockData.price) {
+                    document.getElementById(errorId).textContent = `Could not fetch data for ${symbol}. Please check the symbol and try again.`;
+                    document.getElementById(errorId).style.display = 'block';
+                    showLoading(false);
+                    return;
+                }
+                
+                let stockBeta = 1.0;
+                let benchmarkName = 'BTC';
+                
+                if (tabType === 'sp500') {
+                    // Use standard Finnhub beta (to S&P 500)
+                    benchmarkName = 'S&P 500';
+                    try {
+                        const betaUrl = `https://finnhub.io/api/v1/stock/metric?symbol=${symbol}&token=${FINNHUB_KEY}&metric=beta`;
+                        const betaRes = await fetch(betaUrl);
+                        const betaData = await betaRes.json();
+                        if (betaData && betaData.metric && betaData.metric.beta) {
+                            stockBeta = betaData.metric.beta;
+                        }
+                    } catch(e) {
+                        console.log('Could not fetch beta');
+                    }
+                } else if (tabType === 'nasdaq') {
+                    // Calculate beta relative to NASDAQ (QQQ)
+                    benchmarkName = 'NASDAQ';
+                    try {
+                        // Get QQQ data
+                        const qqqUrl = `https://finnhub.io/api/v1/quote?symbol=QQQ&token=${FINNHUB_KEY}`;
+                        const qqqRes = await fetch(qqqUrl);
+                        const qqqData = await qqqRes.json();
+                        
+                        if (qqqData && qqqData.c > 0) {
+                            // Calculate beta as ratio of volatilities (simplified)
+                            // Stock vol / QQQ vol
+                            const stockVol = stockData.estimatedVolatility || 20;
+                            const qqqVol = qqqData.c > 0 ? ((qqqData.h - qqqData.l) / qqqData.c) * 100 * Math.sqrt(252) : 20;
+                            stockBeta = qqqVol > 0 ? stockVol / qqqVol : 1.0;
+                        }
+                    } catch(e) {
+                        console.log('Could not fetch QQQ data');
+                    }
+                } else {
+                    // Bitcoin tab - beta relative to BTC
+                    benchmarkName = 'BTC';
+                    const btcHistory = cryptoHistory['BTC'];
+                    if (btcHistory && btcHistory.length > 0) {
+                        const btcVol = calculateVolatility(btcHistory.map(p => ({ close: p[1] }))) || 60;
+                        const stockVol = stockData.estimatedVolatility || 20;
+                        stockBeta = btcVol > 0 ? stockVol / btcVol : 1.0;
+                    }
+                }
+                
+                // Calculate metrics
+                let stockReturn30d = stockData.dailyChangePercent || 0;
+                let stockVolatility = stockData.estimatedVolatility || 20;
+                
+                // Optimize portfolio
+                const allocation = optimizePortfolio(stockBeta, stockReturn30d, {}, symbol);
+                
+                // Display results
+                displayResults(symbol, stockData.name, {
+                    return30d: stockReturn30d,
+                    volatility: stockVolatility,
+                    correlation: 0.3,
+                    beta: stockBeta,
+                    benchmark: benchmarkName
+                }, allocation);
+                
+            } catch (e) {
+                console.error(e);
+                document.getElementById(errorId).textContent = 'An error occurred. Please try again.';
+                document.getElementById(errorId).style.display = 'block';
+            }
+            
+            showLoading(false);
+        }
+        
+        function displayResults(symbol, name, metrics, allocation) {
+            document.getElementById('stock-name').textContent = `${symbol} - ${name}`;
+            
+            const returnEl = document.getElementById('stock-return');
+            returnEl.textContent = metrics.return30d.toFixed(2) + '%';
+            returnEl.className = 'stat-value ' + (metrics.return30d >= 0 ? 'positive' : 'negative');
+            
+            document.getElementById('stock-volatility').textContent = metrics.volatility.toFixed(1) + '%';
+            document.getElementById('stock-correlation').textContent = metrics.benchmark || 'BTC';
+            document.getElementById('stock-beta').textContent = metrics.beta.toFixed(2);
+            
+            // Colors: BTC (orange), MSTR (red), others: yellow, green, blue, violet
+            const colors = {
+                'BTC': '#f7931a',  // Bitcoin orange
+                'MSTR': '#e32017', // MSTR red
+                'STRC': '#fbbf24', // Yellow
+                'STRD': '#22c55e', // Green
+                'STRK': '#3b82f6', // Blue
+                'STRF': '#a855f7'  // Violet
+            };
+            
+            // Use the input stock's volatility as target for portfolio
+            const targetVol = metrics.volatility || 20;
+            
+            // Calculate blended metrics - match to target stock's volatility
+            let blendedBeta = 0;
+            let blendedYield = 0;
+            
+            for (const alloc of allocation) {
+                const weight = alloc.weight;
+                blendedBeta += weight * (KNOWN_BETAS[alloc.ticker] || 1.0);
+                blendedYield += weight * (KNOWN_YIELDS[alloc.ticker] || 0);
+            }
+            
+            // Build SVG donut chart - simple stroke approach
+            const radius = 80;
+            const center = 150;
+            
+            let svgSegments = '';
+            let labelsHTML = '';
+            let offset = 0;
+            const circumference = 2 * Math.PI * radius;
+            
+            for (const alloc of allocation) {
+                const percent = alloc.weight * 100;
+                if (percent < 0.1) continue;
+                
+                const color = colors[alloc.ticker] || '#666';
+                const dashLength = (percent / 100) * circumference;
+                
+                // Calculate angle for label position
+                const midPercent = (offset + dashLength / 2) / circumference;
+                const midAngle = midPercent * 360 - 90;
+                const midRad = midAngle * Math.PI / 180;
+                
+                // Add circle segment
+                svgSegments += `
+                    <circle 
+                        cx="${center}" 
+                        cy="${center}" 
+                        r="${radius}" 
+                        fill="none" 
+                        stroke="${color}" 
+                        stroke-width="45"
+                        stroke-dasharray="${dashLength} ${circumference}"
+                        stroke-dashoffset="${-offset}"
+                        transform="rotate(-90 ${center} ${center})"
+                    >
+                        <title>${alloc.ticker}: ${percent.toFixed(1)}%</title>
+                    </circle>
+                `;
+                
+                // Percentage text inside segment
+                const textR = radius;
+                const textX = center + textR * Math.cos(midRad);
+                const textY = center + textR * Math.sin(midRad);
+                svgSegments += `<text x="${textX}" y="${textY}" fill="${color === '#fbbf24' ? '#000' : '#fff'}" font-size="11" font-weight="bold" text-anchor="middle" dominant-baseline="middle">${percent.toFixed(0)}%</text>`;
+                
+                // Label outside
+                const labelR = 165;
+                const lx = center + labelR * Math.cos(midRad);
+                const ly = center + labelR * Math.sin(midRad);
+                labelsHTML += `<div class="donut-label" style="left: ${lx}px; top: ${ly}px; color: ${color};">${alloc.ticker}</div>`;
+                
+                offset += dashLength;
+            }
+            
+            // Format yield - show 0.00% if none
+            const yieldDisplay = blendedYield > 0 ? (blendedYield * 100).toFixed(2) + '%' : '0.00%';
+            
+            const barEl = document.getElementById('allocation-bar');
+            barEl.innerHTML = `
+                <div class="donut-container">
+                    <svg class="donut-svg" viewBox="0 0 300 300">
+                        <circle cx="${center}" cy="${center}" r="${radius}" fill="none" stroke="#222" stroke-width="40" />
+                        ${svgSegments}
+                    </svg>
+                    <div class="donut-center">
+                        <div class="donut-metric">
+                            <div class="donut-metric-label">Beta</div>
+                            <div class="donut-metric-value">${blendedBeta.toFixed(2)}</div>
+                        </div>
+                        <div class="donut-metric">
+                            <div class="donut-metric-label">Yield</div>
+                            <div class="donut-metric-value">${yieldDisplay}</div>
+                        </div>
+                        <div class="donut-metric">
+                            <div class="donut-metric-label">Vol</div>
+                            <div class="donut-metric-value">${targetVol.toFixed(1)}%</div>
+                        </div>
+                    </div>
+                    ${labelsHTML}
+                </div>
+            `;
+            
+            // Hide the old allocation table
+            const tableEl = document.getElementById('allocation-table');
+            tableEl.innerHTML = '';
+            
+            document.getElementById('results').classList.add('active');
+        }
+        
+        function showError(msg, errorId = 'error-crypto') {
+            const el = document.getElementById(errorId);
+            if (el) {
+                el.textContent = msg;
+                el.style.display = 'block';
+            }
+        }
+        
+        function hideError(errorId = 'error-crypto') {
+            const el = document.getElementById(errorId);
+            if (el) {
+                el.style.display = 'none';
+            }
+        }
+        
+        function showLoading(show) {
+            const loadingEl = document.getElementById('loading');
+            if (loadingEl) {
+                loadingEl.classList.toggle('active', show);
+            }
+            // Disable all calculate buttons
+            document.querySelectorAll('button[onclick^="calculate"]').forEach(btn => {
+                btn.disabled = show;
+            });
+        }
+        
+        function hideResults() {
+            document.getElementById('results').classList.remove('active');
+        }
+        
+        // Tab handling
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active class from all tabs and contents
+                    tabs.forEach(t => {
+                        t.classList.remove('active');
+                        t.setAttribute('aria-selected', 'false');
+                    });
+                    tabContents.forEach(c => {
+                        c.classList.remove('active');
+                        c.hidden = true;
+                    });
+                    
+                    // Add active class to clicked tab
+                    tab.classList.add('active');
+                    tab.setAttribute('aria-selected', 'true');
+                    const content = document.getElementById('tab-' + tab.dataset.tab);
+                    content.classList.add('active');
+                    content.hidden = false;
+                    
+                    // Hide results when switching tabs
+                    hideResults();
+                });
+            });
+            
+            // Handle form submissions
+            document.querySelectorAll('form').forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const input = this.querySelector('input');
+                    const tabType = input.id.replace('symbol-', '');
+                    calculate(tabType);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

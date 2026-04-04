@@ -1,0 +1,4 @@
+# Brave Search API Key
+BSAbF4kmTa3NDzetx_7x4HahXLn1ZLw
+
+Add to OpenClaw config for web_search tool.
