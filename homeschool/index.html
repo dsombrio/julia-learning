@@ -1,188 +1,338 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Little Scholar | Classical Learning</title>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --primary: #6C63FF;
-      --success: #4ECB71;
-      --gold: #FFD700;
-      --bg: #F8F9FC;
-      --card: #FFFFFF;
-      --text: #2D3142;
-      --text-light: #9094A6;
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-    header { background: linear-gradient(135deg, var(--primary), #5A52D5); color: white; padding: 20px; text-align: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(108,99,255,0.3); }
-    header h1 { font-size: 28px; font-weight: 800; }
-    header p { font-size: 14px; opacity: 0.9; }
-    .stars-counter { position: absolute; top: 12px; right: 16px; background: rgba(255,255,255,0.2); padding: 8px 14px; border-radius: 20px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
-    nav { display: flex; background: var(--card); padding: 12px 16px; gap: 8px; overflow-x: auto; border-bottom: 1px solid #E8E9F3; }
-    nav button { flex-shrink: 0; background: #F8F9FC; border: 2px solid #E8E9F3; padding: 10px 18px; border-radius: 12px; font-family: inherit; font-weight: 600; font-size: 14px; cursor: pointer; color: var(--text-light); }
-    nav button.active { background: var(--primary); border-color: var(--primary); color: white; }
-    main { padding: 20px; max-width: 800px; margin: 0 auto; }
-    .tab { display: none; }
-    .tab.active { display: block; }
-    .dashboard { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
-    .stat-card { background: var(--card); border-radius: 16px; padding: 16px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-    .stat-card .value { font-size: 28px; font-weight: 800; color: var(--primary); }
-    .stat-card.gold .value { color: var(--gold); }
-    .stat-card.streak .value, .stat-card.success .value { color: var(--success); }
-    .stat-card .label { font-size: 11px; color: var(--text-light); margin-top: 4px; }
-    .subject-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-    .subject-card { background: var(--card); border-radius: 16px; padding: 24px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; }
-    .subject-card:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
-    .subject-card .icon { font-size: 48px; margin-bottom: 12px; }
-    .subject-card h3 { font-size: 16px; margin-bottom: 4px; }
-    .subject-card p { font-size: 12px; color: var(--text-light); }
-    .subject-card .progress { width: 100%; height: 8px; background: #E8E9F3; border-radius: 4px; margin-top: 12px; overflow: hidden; }
-    .subject-card .progress-bar { height: 100%; background: var(--success); border-radius: 4px; }
-    .game-screen { text-align: center; }
-    .back-btn { background: var(--card); border: 2px solid #E8E9F3; padding: 10px 20px; border-radius: 12px; font-family: inherit; font-weight: 600; cursor: pointer; margin-bottom: 20px; }
-    .level-badge { display: inline-block; background: var(--primary); color: white; padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; margin-bottom: 16px; }
-    .question-card { background: var(--card); border-radius: 24px; padding: 40px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); margin-bottom: 24px; }
-    .question-card .question { font-size: 56px; font-weight: 800; margin-bottom: 8px; }
-    .question-card .sub { font-size: 16px; color: var(--text-light); }
-    .answer-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-    .answer-btn { background: var(--card); border: 3px solid #E8E9F3; padding: 24px; border-radius: 16px; font-family: inherit; font-size: 32px; font-weight: 700; cursor: pointer; transition: all 0.2s; min-height: 80px; }
-    .answer-btn:hover { border-color: var(--primary); transform: scale(1.02); }
-    .answer-btn.correct { background: var(--success); border-color: var(--success); color: white; animation: pop 0.3s; }
-    .answer-btn.wrong { background: #FF6B6B; border-color: #FF6B6B; color: white; animation: shake 0.3s; }
-    @keyframes pop { 50% { transform: scale(1.1); } }
-    @keyframes shake { 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
-    .session-progress { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding: 12px 16px; background: var(--card); border-radius: 12px; }
-    .session-progress .stars-earned { display: flex; align-items: center; gap: 4px; font-weight: 700; color: var(--gold); }
-    .session-progress .bar { flex: 1; height: 12px; background: #E8E9F3; border-radius: 6px; overflow: hidden; }
-    .session-progress .bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--success)); border-radius: 6px; transition: width 0.3s; }
-    .reward-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 200; }
-    .reward-overlay.show { display: flex; }
-    .reward-content { background: var(--card); border-radius: 24px; padding: 40px; text-align: center; animation: bounce 0.5s; }
-    @keyframes bounce { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
-    .reward-content .icon { font-size: 80px; }
-    .reward-content h2 { font-size: 28px; margin: 16px 0; color: var(--gold); }
-    .reward-content p { color: var(--text-light); margin-bottom: 20px; }
-    .reward-content button { background: var(--primary); color: white; border: none; padding: 14px 32px; border-radius: 12px; font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer; }
-    .flashcard { background: var(--card); border-radius: 24px; padding: 40px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); margin-bottom: 24px; min-height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
-    .flashcard .word { font-size: 42px; font-weight: 800; margin-bottom: 16px; }
-    .flashcard .hint { font-size: 14px; color: var(--text-light); }
-    .badge-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 20px; }
-    .badge { background: var(--card); border-radius: 16px; padding: 20px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-    .badge.earned { border: 3px solid var(--gold); }
-    .badge.locked { opacity: 0.4; }
-    .badge .icon { font-size: 40px; margin-bottom: 8px; }
-    .badge .name { font-size: 12px; font-weight: 700; }
-    .badge .desc { font-size: 10px; color: var(--text-light); margin-top: 4px; }
-    .worksheet-section { background: var(--card); border-radius: 16px; padding: 24px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-    .worksheet-section h3 { margin-bottom: 16px; font-size: 18px; }
-    .worksheet-section .options { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
-    .worksheet-section select, .worksheet-section input { padding: 10px 14px; border: 2px solid #E8E9F3; border-radius: 10px; font-family: inherit; font-size: 14px; }
-    .print-btn { background: var(--primary); color: white; border: none; padding: 14px 28px; border-radius: 12px; font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer; }
-    #printArea { display: none; }
-    @media print { header, nav, .game-screen, .reward-overlay { display: none !important; } #printArea { display: block !important; } .worksheet { page-break-after: always; margin-bottom: 40px; } .worksheet h2 { font-size: 24px; margin-bottom: 20px; } .worksheet-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; } .worksheet-item { border: 2px solid #333; padding: 20px; text-align: center; font-size: 18px; } }
-    @media (max-width: 600px) { .dashboard { grid-template-columns: repeat(2, 1fr); } .subject-grid { grid-template-columns: 1fr 1fr; } .answer-btn { font-size: 24px; padding: 20px; } .question-card { padding: 30px; } .question-card .question { font-size: 36px; } }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Little Scholar | Julia's Learning App</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#6C63FF;--success:#4ECB71;--gold:#FFD700;--bg:#F8F9FC;--card:#FFFFFF;--text:#2D3142;--text-light:#9094A6;--danger:#FF6B6B}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+header{background:linear-gradient(135deg,var(--primary),#5A52D5);color:white;padding:20px;text-align:center;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(108,99,255,0.3)}
+header h1{font-size:28px;font-weight:800}
+header p{font-size:14px;opacity:0.9}
+.stars-counter{position:absolute;top:12px;right:16px;background:rgba(255,255,255,0.2);padding:8px 14px;border-radius:20px;font-weight:700;display:flex;align-items:center;gap:6px}
+nav{display:flex;background:var(--card);padding:12px 16px;gap:8px;overflow-x:auto;border-bottom:1px solid #E8E9F3}
+nav button{flex-shrink:0;background:#F8F9FC;border:2px solid #E8E9F3;padding:10px 18px;border-radius:12px;font-family:inherit;font-weight:600;font-size:14px;cursor:pointer;color:var(--text-light)}
+nav button.active,nav button:hover{background:var(--primary);border-color:var(--primary);color:white}
+main{padding:20px;max-width:800px;margin:0 auto}
+.tab{display:none}.tab.active{display:block}
+.dashboard{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.stat-card{background:var(--card);border-radius:16px;padding:16px;text-align:center;box-shadow:0 4px 15px rgba(0,0,0,0.05)}
+.stat-card .value{font-size:28px;font-weight:800;color:var(--primary)}
+.stat-card.gold .value{color:var(--gold)}
+.stat-card.streak .value,.stat-card.success .value{color:var(--success)}
+.stat-card .label{font-size:11px;color:var(--text-light);margin-top:4px}
+.subject-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.subject-card{background:var(--card);border-radius:16px;padding:24px;cursor:pointer;transition:transform 0.2s,box-shadow 0.2s;box-shadow:0 4px 15px rgba(0,0,0,0.05);text-align:center}
+.subject-card:hover{transform:translateY(-4px);box-shadow:0 8px 25px rgba(0,0,0,0.1)}
+.subject-card .icon{font-size:48px;margin-bottom:12px}
+.subject-card h3{font-size:16px;margin-bottom:4px}
+.subject-card p{font-size:12px;color:var(--text-light)}
+.subject-card .progress{width:100%;height:8px;background:#E8E9F3;border-radius:4px;margin-top:12px;overflow:hidden}
+.subject-card .progress-bar{height:100%;background:var(--success);border-radius:4px}
+.game-screen{text-align:center}
+.back-btn{background:var(--card);border:2px solid #E8E9F3;padding:10px 20px;border-radius:12px;font-family:inherit;font-weight:600;cursor:pointer;margin-bottom:20px}
+.level-badge{display:inline-block;background:var(--primary);color:white;padding:6px 16px;border-radius:20px;font-size:14px;font-weight:600;margin-bottom:16px}
+.question-card{background:var(--card);border-radius:24px;padding:40px;box-shadow:0 8px 30px rgba(0,0,0,0.1);margin-bottom:24px}
+.question-card .question{font-size:56px;font-weight:800;margin-bottom:8px}
+.question-card .sub{font-size:16px;color:var(--text-light)}
+.answer-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.answer-btn{background:var(--card);border:3px solid #E8E9F3;padding:24px;border-radius:16px;font-family:inherit;font-size:32px;font-weight:700;cursor:pointer;transition:all 0.2s;min-height:80px}
+.answer-btn:hover{border-color:var(--primary);transform:scale(1.02)}
+.answer-btn.correct{background:var(--success);border-color:var(--success);color:white;animation:pop 0.3s}
+.answer-btn.wrong{background:var(--danger);border-color:var(--danger);color:white;animation:shake 0.3s}
+@keyframes pop{50%{transform:scale(1.1)}}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.session-progress{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding:12px 16px;background:var(--card);border-radius:12px}
+.session-progress .stars-earned{display:flex;align-items:center;gap:4px;font-weight:700;color:var(--gold)}
+.session-progress .bar{flex:1;height:12px;background:#E8E9F3;border-radius:6px;overflow:hidden}
+.session-progress .bar-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--success));border-radius:6px;transition:width 0.3s}
+.reward-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;z-index:200}
+.reward-overlay.show{display:flex}
+.reward-content{background:var(--card);border-radius:24px;padding:40px;text-align:center;animation:bounce 0.5s}
+@keyframes bounce{0%{transform:scale(0.5);opacity:0}50%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+.reward-content .icon{font-size:80px}
+.reward-content h2{font-size:28px;margin:16px 0;color:var(--gold)}
+.reward-content p{color:var(--text-light);margin-bottom:20px}
+.reward-content button{background:var(--primary);color:white;border:none;padding:14px 32px;border-radius:12px;font-family:inherit;font-size:16px;font-weight:700;cursor:pointer}
+.flashcard{background:var(--card);border-radius:24px;padding:40px;box-shadow:0 8px 30px rgba(0,0,0,0.1);margin-bottom:24px;min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer}
+.flashcard .word{font-size:42px;font-weight:800;margin-bottom:16px}
+.flashcard .hint{font-size:14px;color:var(--text-light)}
+.badge-gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:20px}
+.badge{background:var(--card);border-radius:16px;padding:20px;text-align:center;box-shadow:0 4px 15px rgba(0,0,0,0.05)}
+.badge.earned{border:3px solid var(--gold)}
+.badge.locked{opacity:0.4}
+.badge .icon{font-size:40px;margin-bottom:8px}
+.badge .name{font-size:12px;font-weight:700}
+.badge .desc{font-size:10px;color:var(--text-light);margin-top:4px}
+.worksheet-section{background:var(--card);border-radius:16px;padding:24px;margin-bottom:20px;box-shadow:0 4px 15px rgba(0,0,0,0.05)}
+.worksheet-section h3{margin-bottom:16px;font-size:18px}
+.worksheet-section .options{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.worksheet-section select,.worksheet-section input{padding:10px 14px;border:2px solid #E8E9F3;border-radius:10px;font-family:inherit;font-size:14px}
+.print-btn{background:var(--primary);color:white;border:none;padding:14px 28px;border-radius:12px;font-family:inherit;font-size:16px;font-weight:700;cursor:pointer}
+#printArea{display:none}
+/* === PRINT FIX === */
+@media print{header,nav,.game-screen,.reward-overlay,.print-btn,.no-print{display:none!important}#printArea,#printArea *{display:block!important}.worksheet{page-break-after:always;margin-bottom:40px}.worksheet h2{font-size:24px;margin-bottom:20px}.worksheet-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.worksheet-item{border:2px solid #333;padding:20px;text-align:center;font-size:18px}}
+@media(max-width:600px){.dashboard{grid-template-columns:repeat(2,1fr)}.subject-grid{grid-template-columns:1fr 1fr}.answer-btn{font-size:24px;padding:20px}.question-card{padding:30px}.question-card .question{font-size:36px}}
+/* === NEW SECTIONS === */
+/* Singapore Math */
+.sg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-top:16px}
+.sg-card{background:var(--card);border-radius:16px;padding:24px;text-align:center;cursor:pointer;box-shadow:0 4px 15px rgba(0,0,0,0.05);transition:transform 0.2s}
+.sg-card:hover{transform:translateY(-4px);box-shadow:0 8px 25px rgba(0,0,0,0.1)}
+.sg-card .icon{font-size:48px;margin-bottom:8px}
+.sg-card h3{font-size:16px;margin-bottom:4px}
+.sg-card p{font-size:12px;color:var(--text-light)}
+.sg-section{display:none}.sg-section.active{display:block}
+.ten-frame{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;max-width:300px;margin:16px auto}
+.tf-dot{width:50px;height:50px;border-radius:50%;background:#E8E9F3;cursor:pointer;transition:background 0.2s;font-size:24px;display:flex;align-items:center;justify-content:center;font-weight:700;color:white;user-select:none}
+.tf-dot.filled{background:var(--primary)}
+.tf-dot:hover{background:var(--primary);opacity:0.7}
+.bond-circles{display:flex;justify-content:center;gap:40px;margin:20px 0}
+.bond-circle{width:80px;height:80px;border-radius:50%;background:var(--card);border:4px solid var(--primary);display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:800;color:var(--primary);cursor:pointer;transition:transform 0.2s}
+.bond-circle:hover{transform:scale(1.1)}
+.bond-hole{width:80px;height:80px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:800;color:white;opacity:0.3}
+.bar-model{display:flex;align-items:center;justify-content:center;gap:8px;margin:16px 0;flex-wrap:wrap}
+.bar-segment{display:inline-block;min-width:60px;height:50px;background:var(--primary);border-radius:8px;margin:2px;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:20px}
+.bar-segment.part-b{background:var(--success)}
+.bar-label{font-size:14px;color:var(--text-light);margin-bottom:4px;text-align:center}
+.story-card{background:var(--card);border-radius:16px;padding:24px;margin-bottom:16px;box-shadow:0 4px 15px rgba(0,0,0,0.08);text-align:left}
+.story-card .emoji{font-size:48px;text-align:center;margin-bottom:12px}
+.story-card .story{font-size:18px;line-height:1.6;margin-bottom:16px}
+.story-card .bar-vis{text-align:center;margin:12px 0}
+/* Milestones */
+.mil-progress{display:flex;align-items:center;gap:8px;margin-bottom:16px}
+.mil-progress-bar{flex:1;height:12px;background:#E8E9F3;border-radius:6px;overflow:hidden}
+.mil-progress-fill{height:100%;background:var(--success);border-radius:6px;transition:width 0.3s}
+.mil-category{background:var(--card);border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 4px 15px rgba(0,0,0,0.05)}
+.mil-category h3{font-size:16px;margin-bottom:12px;color:var(--primary)}
+.mil-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #E8E9F3}
+.mil-item:last-child{border-bottom:none}
+.mil-status{width:16px;height:16px;border-radius:50%;flex-shrink:0}
+.mil-status.not-started{background:#E8E9F3}
+.mil-status.in-progress{background:var(--gold)}
+.mil-status.mastered{background:var(--success)}
+.mil-info{flex:1}
+.mil-info .name{font-size:14px;font-weight:700}
+.mil-info .benchmark{font-size:12px;color:var(--text-light)}
+.mil-info .date{font-size:11px;color:var(--success);margin-top:2px}
+.mil-star{font-size:20px;cursor:pointer;opacity:0.3;transition:opacity 0.2s}
+.mil-star.earned{opacity:1}
+.pin-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;z-index:300}
+.pin-overlay.show{display:flex}
+.pin-box{background:var(--card);border-radius:24px;padding:32px;text-align:center}
+.pin-box h3{font-size:20px;margin-bottom:16px}
+.pin-box input{font-size:32px;width:120px;text-align:center;padding:12px;border:3px solid #E8E9F3;border-radius:12px;letter-spacing:8px}
+.pin-box button{margin-top:16px;background:var(--primary);color:white;border:none;padding:12px 32px;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer}
+.pin-error{color:var(--danger);font-size:14px;margin-top:8px;min-height:20px}
+/* Guide */
+.guide-section{background:var(--card);border-radius:16px;padding:24px;margin-bottom:16px;box-shadow:0 4px 15px rgba(0,0,0,0.05)}
+.guide-section h3{font-size:18px;margin-bottom:12px;color:var(--primary)}
+.guide-section ul{padding-left:20px}
+.guide-section li{font-size:14px;line-height:1.8;color:var(--text)}
+.guide-section .routine{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.guide-section .routine-item{background:#F8F9FC;padding:12px;border-radius:10px;font-size:13px}
+.guide-section .routine-item strong{display:block;color:var(--primary)}
+.vocab-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.vocab-item{background:#F8F9FC;padding:10px 12px;border-radius:8px;font-size:13px}
+.vocab-item strong{color:var(--primary)}
+/* Weekly reminder */
+#weeklyReminder{display:none;background:linear-gradient(135deg,#FF9500,#FF6B00);color:white;padding:12px 20px;border-radius:12px;margin-bottom:16px;font-size:14px;text-align:center;cursor:pointer}
+#weeklyReminder.show{display:block}
+#weeklyReminder strong{display:block;font-size:16px;margin-bottom:4px}
+/* States game */
+.states-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;max-width:400px;margin:0 auto}
+.state-btn{background:var(--card);border:3px solid #E8E9F3;padding:16px;border-radius:12px;font-size:18px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.2s}
+.state-btn:hover{border-color:var(--primary);transform:scale(1.02)}
+.state-btn.correct{background:var(--success);border-color:var(--success);color:white}
+.state-btn.wrong{background:var(--danger);border-color:var(--danger);color:white}
+/* Pattern game */
+.pattern-row{display:flex;gap:8px;justify-content:center;margin:16px 0;flex-wrap:wrap}
+.pattern-item{width:50px;height:50px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700}
+.pattern-blank{width:50px;height:50px;border:3px dashed var(--primary);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--primary)}
+</style>
 </head>
 <body>
-  <header>
-    <div class="stars-counter"><span>⭐</span> <span id="totalStars">0</span></div>
-    <h1>Little Scholar</h1>
-    <p>Classical Learning Adventures</p>
-  </header>
-  <nav>
-    <button class="active" onclick="showTab('dashboard')">Home</button>
-    <button onclick="showTab('math')">Math</button>
-    <button onclick="showTab('reading')">Reading</button>
-    <button onclick="showTab('badges')">Badges</button>
-    <button onclick="showTab('worksheets')">Print</button>
-  </nav>
-  <main>
-    <div id="tab-dashboard" class="tab active">
-      <div class="dashboard">
-        <div class="stat-card gold"><div class="value" id="dashStars">0</div><div class="label">Stars</div></div>
-        <div class="stat-card streak"><div class="value" id="dashStreak">0</div><div class="label">Day Streak</div></div>
-        <div class="stat-card success"><div class="value" id="dashMastered">0</div><div class="label">Mastered</div></div>
-        <div class="stat-card"><div class="value" id="dashLearning">0</div><div class="label">Learning</div></div>
-      </div>
-      <h2 style="margin-bottom:16px;font-size:20px;">Choose Your Adventure</h2>
-      <div class="subject-grid">
-        <div class="subject-card" onclick="startGame('add')"><div class="icon">🔢</div><h3>Addition</h3><p>Master +1 to +20</p><div class="progress"><div class="progress-bar" style="width:0%"></div></div></div>
-        <div class="subject-card" onclick="startGame('skip')"><div class="icon">⏭️</div><h3>Skip Counting</h3><p>Count by 2s, 3s, 5s, 10s</p><div class="progress"><div class="progress-bar" style="width:0%"></div></div></div>
-        <div class="subject-card" onclick="startGame('read')"><div class="icon">📖</div><h3>Word Flash</h3><p>Read & recognize</p><div class="progress"><div class="progress-bar" style="width:0%"></div></div></div>
-        <div class="subject-card" onclick="startGame('states')"><div class="icon">🗺️</div><h3>States</h3><p>Learn US states</p><div class="progress"><div class="progress-bar" style="width:0%"></div></div></div>
-      </div>
-    </div>
-    <div id="tab-math" class="tab game-screen">
-      <button class="back-btn" onclick="showTab('dashboard')">← Back</button>
-      <div class="session-progress"><div class="stars-earned">⭐ <span id="sessionStars">0</span></div><div class="bar"><div class="bar-fill" id="sessionBar" style="width:0%"></div></div><span id="sessionProgress">0/10</span></div>
-      <div class="level-badge" id="gameLevel">Level 1</div>
-      <div class="question-card"><div class="question" id="questionText">5 + 3 = ?</div><div class="sub" id="questionHint">Find the answer</div></div>
-      <div class="answer-grid" id="answerGrid"></div>
-    </div>
-    <div id="tab-reading" class="tab game-screen">
-      <button class="back-btn" onclick="showTab('dashboard')">← Back</button>
-      <div class="level-badge">Reading Practice</div>
-      <div class="flashcard" id="flashcard" onclick="revealCard()"><div class="word" id="flashWord">BUTTERFLY</div><div class="hint" id="flashHint">Tap to reveal</div></div>
-      <div class="answer-grid"><button class="answer-btn" onclick="nextCard(-1)">Hard</button><button class="answer-btn" onclick="nextCard(0)">Okay</button><button class="answer-btn" onclick="nextCard(1)">Easy</button></div>
-    </div>
-    <div id="tab-badges" class="tab">
-      <h2 style="margin-bottom:20px">Your Achievements</h2>
-      <div class="badge-gallery" id="badgeGallery">
-        <div class="badge locked"><div class="icon">🌟</div><div class="name">First Star</div><div class="desc">Earn your first star</div></div>
-        <div class="badge locked"><div class="icon">🔥</div><div class="name">3 Day Streak</div><div class="desc">Learn 3 days in a row</div></div>
-        <div class="badge locked"><div class="icon">🧮</div><div class="name">Math Whiz</div><div class="desc">Master addition 1-20</div></div>
-        <div class="badge locked"><div class="icon">📚</div><div class="name">Word Master</div><div class="desc">Read 50 words</div></div>
-        <div class="badge locked"><div class="icon">🌍</div><div class="name">Explorer</div><div class="desc">Learn all 50 states</div></div>
-        <div class="badge locked"><div class="icon">⭐</div><div class="name">Super Star</div><div class="desc">Earn 100 stars</div></div>
-      </div>
-    </div>
-    <div id="tab-worksheets" class="tab">
-      <div class="worksheet-section">
-        <h3>Math Worksheets</h3>
-        <div class="options">
-          <select id="mathType"><option value="add">Addition</option><option value="sub">Subtraction</option></select>
-          <select id="mathLevel"><option value="easy">Easy (1-10)</option><option value="medium">Medium (1-20)</option></select>
-          <input type="number" id="mathCount" value="20" min="5" max="50" style="width:80px"><span>problems</span>
-        </div>
-        <button class="print-btn" onclick="generateMath()">Generate & Print</button>
-      </div>
-      <div class="worksheet-section">
-        <h3>Reading Worksheets</h3>
-        <div class="options">
-          <input type="number" id="readingCount" value="15" min="5" max="50" style="width:80px"><span>words</span>
-        </div>
-        <button class="print-btn" onclick="generateReading()">Generate & Print</button>
-      </div>
-      <div id="printArea"></div>
-    </div>
-  </main>
-  <div class="reward-overlay" id="rewardOverlay"><div class="reward-content"><div class="icon">🎉</div><h2>Amazing Job!</h2><p id="rewardText">You earned 5 stars!</p><button onclick="closeReward()">Keep Going!</button></div></div>
-<script>
-let state=JSON.parse(localStorage.getItem('scholar-state'))||{stars:0,streak:0,lastPlay:null,mastered:[],badges:[],wordsRead:0};
-function saveState(){localStorage.setItem('scholar-state',JSON.stringify(state));updateDash();}
-function updateDash(){document.getElementById('totalStars').textContent=state.stars;document.getElementById('dashStars').textContent=state.stars;document.getElementById('dashStreak').textContent=state.streak;document.getElementById('dashMastered').textContent=state.mastered.length;document.getElementById('dashLearning').textContent=state.learning?state.learning.length:0;document.querySelectorAll('.badge').forEach(b=>{if(state.badges.includes(b.querySelector('.name').textContent)){b.classList.remove('locked');b.classList.add('earned');}});}
-function checkStreak(){const today=new Date().toDateString();const last=state.lastPlay?new Date(state.lastPlay).toDateString():null;const yesterday=new Date(Date.now()-86400000).toDateString();if(last===yesterday)state.streak++;else if(last!==today)state.streak=1;state.lastPlay=new Date().toISOString();}
-function showTab(tab){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));document.getElementById('tab-'+tab).classList.add('active');event.target.classList.add('active');}
-let gameType,sessionCorrect=0,sessionTotal=0,sessionStars=0;
-function startGame(type){gameType=type;sessionCorrect=0;sessionTotal=0;sessionStars=0;checkStreak();document.getElementById('sessionStars').textContent='0';document.getElementById('sessionBar').style.width='0%';document.getElementById('sessionProgress').textContent='0/10';if(type==='add'||type==='sub'){showTab('math');nextQuestion();}else if(type==='skip'){showTab('math');nextSkip();}else if(type==='read'){showTab('reading');nextFlash();}}
-function nextQuestion(){const max=20;let a=Math.floor(Math.random()*max)+1,b=Math.floor(Math.random()*max)+1,answer;if(gameType==='add'){answer=a+b;document.getElementById('questionText').textContent=a+' + '+b+' = ?';}else{answer=a-b;document.getElementById('questionText').textContent=a+' - '+b+' = ?';}let wrong=[];while(wrong.length<3){const w=answer+(Math.floor(Math.random()*7)-3);if(w!==answer&&w>0&&!wrong.includes(w))wrong.push(w);}const options=[answer,...wrong].sort(()=>Math.random()-0.5);document.getElementById('answerGrid').innerHTML=options.map(o=>`<button class="answer-btn" onclick="checkAns(${o},${answer})">${o}</button>`).join('');}
-function checkAns(s,c){const btns=document.querySelectorAll('.answer-btn');btns.forEach(b=>{b.disabled=true;if(parseInt(b.textContent)===c)b.classList.add('correct');else if(parseInt(b.textContent)===s&&s!==c)b.classList.add('wrong');});sessionTotal++;if(s===c){sessionCorrect++;sessionStars+=2;state.stars+=2;document.getElementById('sessionStars').textContent=sessionStars;}document.getElementById('sessionBar').style.width=(sessionTotal/10*100)+'%';document.getElementById('sessionProgress').textContent=sessionTotal+'/10';saveState();setTimeout(()=>{if(sessionTotal>=10)endGame();else nextQuestion();},1000);}
-function nextSkip(){const counts=[2,3,4,5,6,7,8,9,10];const by=counts[Math.floor(Math.random()*counts.length)];const start=Math.floor(Math.random()*5)*by;const seq=[start,start+by,start+by*2,start+by*3];document.getElementById('questionText').textContent=seq.join(', ')+', _';const answer=start+by*4;const wrong=[answer+by,answer-by,answer+by*2].filter(n=>n>0&&n!==answer);const options=[answer,...wrong.slice(0,3)].sort(()=>Math.random()-0.5);document.getElementById('answerGrid').innerHTML=options.map(o=>`<button class="answer-btn" onclick="checkAns(${o},${answer})">${o}</button>`).join('');}
-const words=['BUTTERFLY','RAINBOW','ADVENTURE','BEAUTIFUL','FANTASTIC','CHOCOLATE','ELEPHANT','GIRAFFE','HAPPINESS','JELLYFISH','KANGAROO','LIBRARY','MAGICAL','PINEAPPLE','QUESTION','TREASURE','UMBRELLA','VOLCANO','WATERFALL','ZEBRA','ASTRONAUT','BALLOON','DINOSAUR','FLOWER','GARDEN','ISLAND','MOUNTAIN','NOTEBOOK','ORANGE','PRETEND'];
-let flashIndex=0;
-function nextFlash(){flashIndex=Math.floor(Math.random()*words.length);document.getElementById('flashWord').textContent=words[flashIndex];document.getElementById('flashHint').textContent='Tap to reveal';document.getElementById('flashcard').classList.remove('reveal');}
-function revealCard(){document.getElementById('flashHint').textContent='Sound it out!';document.getElementById('flashcard').classList.add('reveal');}
-function nextCard(difficulty){if(difficulty>0)state.wordsRead++;sessionTotal++;sessionStars+=1;state.stars+=1;document.getElementById('sessionStars').textContent=sessionStars;document.getElementById('sessionBar').style.width=(sessionTotal/10*100)+'%';document.getElementById('sessionProgress').textContent=sessionTotal+'/10';saveState();if(sessionTotal>=10)endGame();else nextFlash();}
-function endGame(){if(sessionCorrect>=7){showReward();}else{showTab('dashboard');}}
-function showReward(){document.getElementById('rewardText').textContent='You earned '+sessionStars+' stars!';document.getElementById('rewardOverlay').classList.add('show');checkBadges();}
-function closeReward(){document.getElementById('rewardOverlay').classList.remove('show');showTab('dashboard');}
-function checkBadges(){if(state.stars>=1&&!state.badges.includes('First Star'))state.badges.push('First Star');if(state.streak>=3&&!state.badges.includes('3 Day Streak'))state.badges.push('3 Day Streak');if(state.stars>=100&&!state.badges.includes('Super Star'))state.badges.push('Super Star');saveState();}
-function generateMath(){const type=document.getElementById('mathType').value;const level=document.getElementById('mathLevel').value;const count=parseInt(document.getElementById('mathCount').value)||20;const max=level==='easy'?10:20;let html=`<div class="worksheet"><h2>${type==='add'?'Addition':'Subtraction'} Worksheet (${level})</h2><div class="worksheet-grid">`;for(let i=0;i<count;i++){const a=Math.floor(Math.random()*max)+1;const b=Math.floor(Math.random()*max)+1;if(type==='add'){html+=`<div class="worksheet-item">${a} + ${b} = ____</div>`;}else{const big=Math.max(a,b);const small=Math.min(a,b);html+=`<div class="worksheet-item">${big} - ${small} = ____</div>`;}}html+='</div></div>';document.getElementById('printArea').innerHTML=html;window.print();}
-function generateReading(){const count=parseInt(document.getElementById('readingCount').value)||15;let html=`<div class="worksheet"><h2>Reading Worksheet</h2><div class="worksheet-grid">`;for(let i=0;i<count;i++){const word=words[Math.floor(Math.random()*words.length)];html+=`<div class="worksheet-item" style="font-size:24px;font-weight:700;">${word}</div>`;}html+='</div></div>';document.getElementById('printArea').innerHTML=html;window.print();}
-updateDash();
-</script>
-</body>
-</html>
+<header>
+<div class="stars-counter"><span>⭐</span> <span id="totalStars">0</span></div>
+<h1>Little Scholar</h1>
+<p>Julia's Learning Adventures</p>
+</header>
+<nav>
+<button class="active" onclick="showTab('dashboard')">Home</button>
+<button onclick="showTab('math')">Math</button>
+<button onclick="showTab('reading')">Reading</button>
+<button onclick="showTab('singapore')">⭐ Singapore</button>
+<button onclick="showTab('badges')">Badges</button>
+<button onclick="showTab('milestones')">Milestones</button>
+<button onclick="showTab('worksheets')">Print</button>
+<button onclick="showTab('guide')">Guide</button>
+</nav>
+<main>
+<!-- DASHBOARD -->
+<div id="tab-dashboard" class="tab active">
+<div id="weeklyReminder" onclick="showTab('singapore')"><strong>Julia hasn't hit a new milestone this week!</strong>Try a number bond session to keep moving forward!</div>
+<div class="dashboard">
+<div class="stat-card gold"><div class="value" id="dashStars">0</div><div class="label">Stars</div></div>
+<div class="stat-card streak"><div class="value" id="dashStreak">0</div><div class="label">Day Streak</div></div>
+<div class="stat-card success"><div class="value" id="dashMastered">0</div><div class="label">Mastered</div></div>
+<div class="stat-card"><div class="value" id="dashMilestones">0/22</div><div class="label">Milestones</div></div>
+</div>
+<h2 style="margin-bottom:16px;font-size:20px;">Choose Your Adventure</h2>
+<div class="subject-grid">
+<div class="subject-card" onclick="startGame('add')"><div class="icon">🔢</div><h3>Addition</h3><p>Master +1 to +20</p><div class="progress"><div class="progress-bar" style="width:0%"></div></div></div>
+<div class="subject-card" onclick="startGame('sub')"><div class="icon">➖</div><h3>Subtraction</h3><p>Take away fun!</p><div class="progress"><div class="progress-bar" style="width:0%"></div></div></div>
+<div class="subject-card" onclick="startGame('skip')"><div class="icon">⏭️</div><h3>Skip Counting</h3><p>By 2s, 3s, 5s, 10s</p><div class="progress"><div class="progress-bar" style="width:0%"></div></div></div>
+<div class="subject-card" onclick="startGame('states')"><div class="icon">🗺️</div><h3>States</h3><p>Learn all 50 states</p><div class="progress"><div class="progress-bar" style="width:0%"></div></div></div>
+<div class="subject-card" onclick="startGame('patterns')"><div class="icon">�🔴🔵</div><h3>Patterns</h3><p>Find the rule!</p><div class="progress"><div class="progress-bar" style="width:0%"></div></div></div>
+<div class="subject-card" onclick="showTab('singapore')"><div class="icon">⭐</div><h3>Singapore Math</h3><p>Bonds, bars & more</p><div class="progress"><div class="progress-bar" style="width:0%"></div></div></div>
+</div>
+</div>
+<!-- MATH TAB -->
+<div id="tab-math" class="tab game-screen">
+<button class="back-btn" onclick="showTab('dashboard')">← Back</button>
+<div class="session-progress"><div class="stars-earned">⭐ <span id="sessionStars">0</span></div><div class="bar"><div class="bar-fill" id="sessionBar" style="width:0%"></div></div><span id="sessionProgress">0/10</span></div>
+<div class="level-badge" id="gameLevel">Level 1</div>
+<div class="question-card"><div class="question" id="questionText">5 + 3 = ?</div><div class="sub" id="questionHint">Find the answer</div></div>
+<div class="answer-grid" id="answerGrid"></div>
+</div>
+<!-- READING TAB -->
+<div id="tab-reading" class="tab game-screen">
+<button class="back-btn" onclick="showTab('dashboard')">← Back</button>
+<div class="level-badge">Reading Practice — <span id="wordsReadCount">0</span> words mastered</div>
+<div class="flashcard" id="flashcard" onclick="revealCard()"><div class="word" id="flashWord">BUTTERFLY</div><div class="hint" id="flashHint">Tap to reveal</div></div>
+<div class="answer-grid"><button class="answer-btn" onclick="nextCard(-1)" style="font-size:20px;padding:16px">Hard</button><button class="answer-btn" onclick="nextCard(0)" style="font-size:20px;padding:16px">Okay</button><button class="answer-btn" onclick="nextCard(1)" style="font-size:20px;padding:16px">Easy</button></div>
+</div>
+<!-- SINGAPORE MATH TAB -->
+<div id="tab-singapore" class="tab">
+<h2 style="margin-bottom:16px">⭐ Singapore Math</h2>
+<div class="sg-grid">
+<div class="sg-card" onclick="startSG('bonds')"><div class="icon">🥚</div><h3>Number Bonds</h3><p>Bonds of 5 to 10</p></div>
+<div class="sg-card" onclick="startSG('tenframe')"><div class="icon">🔲</div><h3>Ten Frames</h3><p>See numbers to 10</p></div>
+<div class="sg-card" onclick="startSG('barmodel')"><div class="icon">📊</div><h3>Bar Models</h3><p>Picture the problem</p></div>
+<div class="sg-card" onclick="startSG('make10')"><div class="icon">🔟</div><h3>Make 10</h3><p>Pairs that add to 10</p></div>
+<div class="sg-card" onclick="startSG('stories')"><div class="icon">📖</div><h3>Number Stories</h3><p>Word problems</p></div>
+<div class="sg-card" onclick="startSG('patterns')"><div class="icon">�🔴🔵</div><h3>Patterns</h3><p>Find the rule</p></div>
+</div>
+<div id="sg-section-bonds" class="sg-section">
+<button class="back-btn" onclick="closeSG()">← Back</button>
+<div class="level-badge">Number Bonds</div>
+<div style="text-align:center;margin-bottom:16px">
+<button class="answer-btn" onclick="setBondTarget(5)" style="font-size:16px;padding:10px;min-height:48px;margin:4px">Bonds of 5</button>
+<button class="answer-btn" onclick="setBondTarget(6)" style="font-size:16px;padding:10px;min-height:48px;margin:4px">Bonds of 6</button>
+<button class="answer-btn" onclick="setBondTarget(7)" style="font-size:16px;padding:10px;min-height:48px;margin:4px">Bonds of 7</button>
+<button class="answer-btn" onclick="setBondTarget(8)" style="font-size:16px;padding:10px;min-height:48px;margin:4px">Bonds of 8</button>
+<button class="answer-btn" onclick="setBondTarget(9)" style="font-size:16px;padding:10px;min-height:48px;margin:4px">Bonds of 9</button>
+<button class="answer-btn" onclick="setBondTarget(10)" style="font-size:16px;padding:10px;min-height:48px;margin:4px">Bonds of 10</button>
+</div>
+<div class="question-card" style="padding:24px">
+<div class="bar-label" id="bondQuestion">What goes with 3 to make 7?</div>
+<div class="bond-circles">
+<div class="bond-circle" id="bondLeft">3</div>
+<div style="font-size:36px;color:var(--primary);font-weight:800">+</div>
+<div class="bond-hole" id="bondRight">?</div>
+<div style="font-size:36px;color:var(--primary);font-weight:800">=</div>
+<div class="bond-circle" id="bondTarget">7</div>
+</div>
+<div class="answer-grid" id="bondAnswers" style="grid-template-columns:repeat(4,1fr)"></div>
+</div>
+<div style="text-align:center;font-size:14px;color:var(--text-light)">⭐ <span id="bondScore">0</span> correct today</div>
+</div>
+<div id="sg-section-tenframe" class="sg-section">
+<button class="back-btn" onclick="closeSG()">← Back</button>
+<div class="level-badge">Ten Frames</div>
+<div style="text-align:center;margin-bottom:12px">
+<button class="answer-btn" onclick="startTF('show')" style="font-size:14px;padding:10px;min-height:48px">Show Mode</button>
+<button class="answer-btn" onclick="startTF('add')" style="font-size:14px;padding:10px;min-height:48px">Add Mode</button>
+<button class="answer-btn" onclick="startTF('compare')" style="font-size:14px;padding:10px;min-height:48px">Compare</button>
+</div>
+<div class="question-card" style="padding:24px">
+<div class="bar-label" id="tfQuestion">Fill 7 dots</div>
+<div class="ten-frame" id="tenFrame"></div>
+</div>
+<div class="answer-grid" id="tfAnswers"></div>
+<div style="text-align:center;font-size:14px;color:var(--text-light)">⭐ <span id="tfScore">0</span> correct today</div>
+</div>
+<div id="sg-section-barmodel" class="sg-section">
+<button class="back-btn" onclick="closeSG()">← Back</button>
+<div class="level-badge">Bar Models</div>
+<div class="question-card" style="padding:24px">
+<div class="bar-label" id="bmQuestion">Sam has 3 apples. He buys 2 more. How many apples does he have?</div>
+<div class="bar-model" id="barModel">
+<div class="bar-segment" style="background:#E8E9F3;color:var(--text-light)">3</div>
+<div style="font-size:24px;color:var(--primary);font-weight:800">+</div>
+<div class="bar-segment" id="bmPartB" style="background:#E8E9F3;color:var(--text-light)">?</div>
+<div style="font-size:24px;color:var(--primary);font-weight:800">=</div>
+<div class="bar-segment" id="bmTotal" style="background:var(--primary)">5</div>
+</div>
+<div class="bar-model" style="margin-top:8px">
+<span style="font-size:13px;color:var(--text-light)">Tap the bar to show the answer</span>
+</div>
+<div class="answer-grid" id="bmAnswers" style="grid-template-columns:repeat(4,1fr)"></div>
+</div>
+<div style="text-align:center;font-size:14px;color:var(--text-light)">⭐ <span id="bmScore">0</span> correct today</div>
+</div>
+<div id="sg-section-make10" class="sg-section">
+<button class="back-btn" onclick="closeSG()">← Back</button>
+<div class="level-badge">Make 10</div>
+<div class="question-card" style="padding:24px">
+<div class="bar-label" id="m10Question">7 + ? = 10</div>
+<div class="bond-circles">
+<div class="bond-circle" id="m10Left">7</div>
+<div style="font-size:36px;color:var(--primary);font-weight:800">+</div>
+<div class="bond-hole" id="m10Right">?</div>
+<div style="font-size:36px;color:var(--primary);font-weight:800">=</div>
+<div class="bond-circle" id="m10Target">10</div>
+</div>
+<div class="answer-grid" id="m10Answers" style="grid-template-columns:repeat(4,1fr)"></div>
+</div>
+<div style="text-align:center;font-size:14px;color:var(--text-light)">⭐ <span id="m10Score">0</span> correct — badge at 9!</div>
+</div>
+<div id="sg-section-stories" class="sg-section">
+<button class="back-btn" onclick="closeSG()">← Back</button>
+<div class="level-badge" id="nsLevelLabel">Number Stories — Level 1</div>
+<div style="text-align:center;margin-bottom:12px">
+<button class="answer-btn" onclick="setNSLevel(1)" style="font-size:14px;padding:8px;min-height:44px">Level 1</button>
+<button class="answer-btn" onclick="setNSLevel(2)" style="font-size:14px;padding:8px;min-height:44px">Level 2</button>
+<button class="answer-btn" onclick="setNSLevel(3)" style="font-size:14px;padding:8px;min-height:44px">Level 3</button>
+</div>
+<div id="nsStoryCard" class="story-card">
+<div class="emoji" id="nsEmoji">🍎</div>
+<div class="story" id="nsStory">Sara has 4 apples. She picks 3 more at the orchard. How many apples does she have now?</div>
+<div class="bar-vis" id="nsBarVis"></div>
+<div class="answer-grid" id="nsAnswers" style="grid-template-columns:repeat(2,1fr)"></div>
+</div>
+<div style="text-align:center;font-size:14px;color:var(--text-light)">⭐ <span id="nsScore">0</span> stories solved</div>
+</div>
+<div id="sg-section-patterns" class="sg-section">
+<button class="back-btn" onclick="closeSG()">← Back</button>
+<div class="level-badge">Patterns</div>
+<div class="question-card" style="padding:24px">
+<div class="bar-label" id="patQuestion">What comes next?</div>
+<div class="pattern-row" id="patRow"></div>
+<div class="pattern-row" id="patChoices"></div>
+</div>
+</div>
+<!-- BADGES TAB -->
+<div id="tab-badges" class="tab">
+<h2 style="margin-bottom:20px">Your Achievements</h2>
+<div class="badge-gallery" id="badgeGallery"></div>
+</div>
+<!-- MILESTONES TAB -->
+<div id="tab-milestones" class="tab">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+<h2>Milestones</h2>
+<button onclick="showPinOverlay()" style="background:#F8F9FC;border:2px solid #E8E9F3;padding:8px 16px;border-radius:10px;font-size:13px;cursor:pointer">Parent Edit</button>
+</div>
+<div class="mil-progress"><span style="font-size:14px;font-weight:700">Overall Progress</span><div class="mil-progress-bar"><div class="mil-progress-fill" id="overallProgress" style="width:0%"></div></div><span id="overallPercent" style="font-size:14px;font-weight:700">0%</span></div>
+<div id="milestoneContent"></div>
+</div>
+<!-- PRINT TAB -->
+<div id="tab-worksheets" class="tab">
+<div class="worksheet-section">
+<h3>Math Worksheets</h3>
+<div class="options">
+<select id="mathType"><option value="add">Addition</option><option value="sub">Subtraction</option></select>
+<select id="mathLevel"><option value="easy">Easy (1-10)</option><option value="medium">Medium (1-20)</option></select>
+<input type="number" id="mathCount" value="20" min="5" max="50" style="width:80px"><span
